@@ -1,10 +1,10 @@
 # Prosody plugins
 
-- [token affiliation](token_affiliation/README.md)
+- [token affiliation](token_affiliation/)
 
   Sets the occupant's affiliation according to the token content.
 
-- [token owner party](token_owner_party/README.md)
+- [token owner party](token_owner_party/)
 
   Prevents the unauthorized users to create a room and terminates the conference
   when the owner leaves.
