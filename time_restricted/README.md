@@ -7,7 +7,10 @@ This plugin sets a time limit to the conference.
 - Copy this script to the Prosody plugins folder. It's the following folder on
   Debian
 
-  _/usr/share/jitsi-meet/prosody-plugins/_
+  ```bash
+  cd /usr/share/jitsi-meet/prosody-plugins/
+  wget -O mod_time_restricted.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/time_restricted/mod_time_restricted.lua
+  ```
 
 - Enable module in your prosody config.
 

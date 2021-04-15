@@ -7,8 +7,9 @@ This plugin sets the occupant's affiliation according to the token content.
 - Copy this script to the Prosody plugins folder. It's the following folder on
   Debian:
 
-  ```
-  /usr/share/jitsi-meet/prosody-plugins/
+  ```bash
+  cd /usr/share/jitsi-meet/prosody-plugins/
+  wget -O mod_token_affiliation.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/token_affiliation/mod_token_affiliation.lua
   ```
 
 - Enable module in your prosody config.

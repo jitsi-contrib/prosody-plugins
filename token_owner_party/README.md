@@ -9,7 +9,10 @@ and `token_affiliation` plugins.
 - Copy this script to the Prosody plugins folder. It's the following folder on
   Debian
 
-  _/usr/share/jitsi-meet/prosody-plugins/_
+  ```bash
+  cd /usr/share/jitsi-meet/prosody-plugins/
+  wget -O mod_token_owner_party.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/token_owner_party/mod_token_owner_party.lua
+  ```
 
 - Enable module in your prosody config.
 
