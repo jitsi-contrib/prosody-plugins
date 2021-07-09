@@ -68,9 +68,9 @@ When an occupant joins, `POST ${api_prefix}/events/occupant/joined` is called wi
 * occupant
     * occupant_jid
     * joined_at
-    * name (if JWT token auth used. Take from user context.)
-    * email (if JWT token auth used. Take from user context.)
-    * id (if JWT token auth used. Take from user context.)
+    * name (if JWT token auth used. Taken from user context.)
+    * email (if JWT token auth used. Taken from user context.)
+    * id (if JWT token auth used. Taken from user context.)
 
 Example:
 
@@ -99,9 +99,9 @@ When an occupant leaves, `POST ${api_prefix}/events/occupant/left` is called wit
     * occupant_jid
     * joined_at
     * left_at
-    * name (if JWT token auth used. Take from user context.)
-    * email (if JWT token auth used. Take from user context.)
-    * id (if JWT token auth used. Take from user context.)
+    * name (if JWT token auth used. Taken from user context.)
+    * email (if JWT token auth used. Taken from user context.)
+    * id (if JWT token auth used. Taken from user context.)
 
 Example:
 
