@@ -1,8 +1,8 @@
 # Event Sync
 
-This prosody sends HTTP POST request with JSON payload to external API when occupant or room events are triggered.
+This prosody component sends HTTP POST request with JSON payload to external API when occupant or room events are triggered.
 
-If JWT token auth is used, name and email from the user context is also included in the JSON
+If JWT token auth is used, `name`, `email` and `id` from the user context is also included in the JSON
 payload for occupant data.
 
 
@@ -22,7 +22,7 @@ Example:
 {
   "event_name": "muc-room-created",
   "room_name": "catchup",
-  "room_jid": "catchup@conference.domain.com",
+  "room_jid": "catchup@conference.meet.mydomain.com",
   "created_at": 1625823996
 }
 ```
@@ -43,7 +43,7 @@ Example:
 {
   "event_name": "muc-room-created",
   "room_name": "catchup",
-  "room_jid": "catchup@conference.domain.com",
+  "room_jid": "catchup@conference.meet.mydomain.com",
   "created_at": 1625823996,
   "destroyed_at": 1625824035,
   "all_occupants": [
@@ -51,7 +51,7 @@ Example:
       "name": "James Barrow",
       "email": "j.barrow@domain.com",
       "id": "00380324-a840-400d-880f-7ee0933b7556",
-      "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@domain.com/OWhl8jSh"
+      "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
       "joined_at": 1625823996,
       "left_at": 1625824035
     }
@@ -78,12 +78,12 @@ Example:
 {
   "event_name": "muc-occupant-joined",
   "room_name": "catchup",
-  "room_jid": "catchup@conference.domain.com",
+  "room_jid": "catchup@conference.meet.mydomain.com",
   "occupant": {
     "name": "James Barrow",
     "email": "j.barrow@domain.com",
     "id": "00380324-a840-400d-880f-7ee0933b7556",
-    "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@domain.com/OWhl8jSh"
+    "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
     "joined_at": 1625823996
   }
 }
@@ -109,12 +109,12 @@ Example:
 {
   "event_name": "muc-occupant-left",
   "room_name": "catchup",
-  "room_jid": "catchup@conference.domain.com",
+  "room_jid": "catchup@conference.meet.mydomain.com",
   "occupant": {
     "name": "James Barrow",
     "email": "j.barrow@domain.com",
     "id": "00380324-a840-400d-880f-7ee0933b7556",
-    "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@domain.com/OWhl8jSh"
+    "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
     "joined_at": 1625823996,
     "left_at": 1625824035
   }
@@ -137,8 +137,8 @@ Example:
   _/etc/prosody/conf.d/meet.mydomain.com.cfg.lua_
   
   ```lua
-  Component "event_sync.domain.com" "event_sync_component"
-      muc_component = "conference.domain.com"
+  Component "event_sync.meet.mydomain.com" "event_sync_component"
+      muc_component = "conference.meet.mydomain.com"
       api_prefix = "http://your.api.server/api"
   ```
   
@@ -153,8 +153,8 @@ Example:
 Here's an example of the prosody config with optional configs values set:
 
 ```lua
-Component "event_sync.domain.com" "event_sync_component"
-    muc_component = "conference.domain.com"
+Component "event_sync.meet.mydomain.com" "event_sync_component"
+    muc_component = "conference.meet.mydomain.com"
     api_prefix = "http://your.api.server/api"
     
     --- The following are all optional
