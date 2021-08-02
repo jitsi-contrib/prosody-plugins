@@ -70,13 +70,13 @@ module:hook("muc-occupant-left", function (event)
         end
     end
 
-    -- since there is no other owner, kick all participants after TIMEOUT secs
+    -- since there is no other owner, destroy the room after TIMEOUT secs
     timer.add_task(TIMEOUT, function()
         if is_healthcheck_room(room.jid) then
             return
         end
 
-        -- last check before kicking all participants
+        -- last check before destroying the room
         -- if the owner is returned, cancel
         for _, o in room:each_occupant() do
             if not _is_admin(o.jid) then
@@ -87,16 +87,8 @@ module:hook("muc-occupant-left", function (event)
             end
         end
 
-        -- kick all participants
-        for _, p in room:each_occupant() do
-            if not _is_admin(p.jid) then
-                if room:get_affiliation(p.jid) ~= "owner" then
-                    room:set_affiliation(true, p.jid, "outcast")
-                    module:log(LOGLEVEL, "timer, kick the occupant, %s", p.jid)
-                end
-            end
-        end
-
+        -- destroy the room
+        room:destroy()
         module:log(LOGLEVEL, "the party finished")
     end)
 end)
