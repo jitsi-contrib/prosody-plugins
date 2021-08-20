@@ -30,8 +30,15 @@ and `token_affiliation` plugins.
     party_check_timeout = 20
   ```
 
-- For most scenarios you may want to disable auto-ownership on Jicofo. Add the
-  following line to `/etc/jitsi/jicofo/sip-communicator.properties`
+- For most scenarios you may want to disable auto-ownership on Jicofo.
+
+   ```bash
+   hocon -f /etc/jitsi/jicofo/jicofo.conf \
+       set jicofo.conference.enable-auto-owner false
+   ```
+
+  For old versions, you may set the same value by adding the following line to
+  `/etc/jitsi/jicofo/sip-communicator.properties`
 
   ```conf
   org.jitsi.jicofo.DISABLE_AUTO_OWNER=true
