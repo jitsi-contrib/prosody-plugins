@@ -13,6 +13,13 @@
 
   Sets a time limit to the conference.
 
-- [event_sync](event_sync/)
+- [event sync](event_sync/)
 
   Sends HTTP POST to external API when occupant or room events triggered.
+  
+- [frozen nick](frozen_nick/)
+
+  Prevents users from changing display name set by JWT auth.
+  
+
+  
