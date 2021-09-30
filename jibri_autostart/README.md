@@ -9,7 +9,7 @@ This plugin automatically starts recording when the moderator comes into the roo
 
   ```bash
   cd /usr/share/jitsi-meet/prosody-plugins/
-  wget -O mod_jibri_autostart.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/mod_jibri_autostart/mod_jibri_autostart.lua
+  wget -O mod_jibri_autostart.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/jibri_autostart/mod_jibri_autostart.lua
   ```
 
 - Enable module in your prosody config.
