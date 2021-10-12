@@ -87,8 +87,17 @@ module:hook("muc-occupant-left", function (event)
             end
         end
 
-        -- destroy the room
-        room:destroy()
+        -- don't destroy room, this will cause an issue
+        -- kick all participants
+        for _, p in room:each_occupant() do
+            if not _is_admin(p.jid) then
+                if room:get_affiliation(p.jid) ~= "owner" then
+                    room:set_affiliation(true, p.jid, "outcast")
+                    module:log(LOGLEVEL, "kick the occupant, %s", p.jid)
+                end
+            end
+        end
+
         module:log(LOGLEVEL, "the party finished")
     end)
 end)
