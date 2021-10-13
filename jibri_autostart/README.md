@@ -1,6 +1,7 @@
 # Jibri Autostart
 
-This plugin automatically starts recording when the moderator comes into the room.
+This plugin automatically starts recording when the moderator comes into the
+room.
 
 ## Installation
 

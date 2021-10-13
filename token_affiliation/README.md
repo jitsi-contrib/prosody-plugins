@@ -29,7 +29,7 @@ This plugin sets the occupant's affiliation according to the token content.
   ```bash
   hocon -f /etc/jitsi/jicofo/jicofo.conf \
       set jicofo.conference.enable-auto-owner false
-  ````
+  ```
 
   For old versions, you may set the same value by adding the following line to
   `/etc/jitsi/jicofo/sip-communicator.properties`

@@ -32,10 +32,10 @@ and `token_affiliation` plugins.
 
 - For most scenarios you may want to disable auto-ownership on Jicofo.
 
-   ```bash
-   hocon -f /etc/jitsi/jicofo/jicofo.conf \
-       set jicofo.conference.enable-auto-owner false
-   ```
+  ```bash
+  hocon -f /etc/jitsi/jicofo/jicofo.conf \
+      set jicofo.conference.enable-auto-owner false
+  ```
 
   For old versions, you may set the same value by adding the following line to
   `/etc/jitsi/jicofo/sip-communicator.properties`
