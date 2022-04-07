@@ -41,7 +41,7 @@ Example:
 
 ```json
 {
-  "event_name": "muc-room-created",
+  "event_name": "muc-room-destroyed",
   "room_name": "catchup",
   "room_jid": "catchup@conference.meet.mydomain.com",
   "created_at": 1625823996,
