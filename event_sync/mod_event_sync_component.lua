@@ -164,18 +164,6 @@ function EventData:on_occupant_leave(occupant_jid)
     return occupant_data;
 end
 
---- Returns array of occupant data for all active occupant.
---- @param exclude occupant_jid to exclude form the output
-function EventData:get_active_occupant_array(exclude)
-    local output = {};
-    for _, jid in ipairs(self.active) do
-        if jid ~= exclude then
-            table.insert(output, self.occupants[jid])
-        end
-    end
-
-    return output;
-end
 
 --- Returns array of all (past or present) occupants
 function EventData:get_occupant_array()
