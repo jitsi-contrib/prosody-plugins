@@ -169,4 +169,7 @@ Component "event_sync.meet.mydomain.com" "event_sync_component"
     api_should_retry_for_code = function (code)
         return code >= 500 or code == 408
     end
+    
+    -- Optionally include total_dominant_speaker_time (milliseconds) in payload for occupant-left and room-destroyed
+    include_speaker_stats = true
 ```

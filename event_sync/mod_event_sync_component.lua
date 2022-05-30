@@ -8,6 +8,7 @@
 --        api_prefix = "http://external_app.mydomain.com/api"
 --
 --        --- The following are all optional
+--        include_speaker_stats = true  -- if true, total_dominant_speaker_time included in occupant payload
 --        api_headers = {
 --            ["Authorization"] = "Bearer TOKEN-237958623045";
 --        }
@@ -31,6 +32,9 @@ local api_timeout = module:get_option("api_timeout", 20);
 local api_headers = module:get_option("api_headers");
 local api_retry_count = tonumber(module:get_option("api_retry_count", 3));
 local api_retry_delay = tonumber(module:get_option("api_retry_delay", 1));
+
+local include_speaker_stats = module:get_option("include_speaker_stats", false);
+
 
 -- Option for user to control HTTP response codes that will result in a retry.
 -- Defaults to returning true on any 5XX code or 0
@@ -152,13 +156,17 @@ function EventData:on_occupant_joined(occupant_jid, event_origin)
 end
 
 --- Handle occupant leaving room
-function EventData:on_occupant_leave(occupant_jid)
+function EventData:on_occupant_leave(occupant_jid, room)
     local left_at = now();
     self.active[occupant_jid] = nil;
 
     local occupant_data = self.occupants[occupant_jid];
     if occupant_data then
         occupant_data['left_at'] = left_at;
+    end
+
+    if include_speaker_stats and room.speakerStats then
+        occupant_data['total_dominant_speaker_time'] = room.speakerStats[occupant_jid].totalDominantSpeakerTime
     end
 
     return occupant_data;
@@ -293,7 +301,7 @@ function occupant_left(event)
         return;
     end
 
-    local occupant_data = room_data:on_occupant_leave(occupant_jid);
+    local occupant_data = room_data:on_occupant_leave(occupant_jid, room);
     module:log("info", "Occupant left - %s", json.encode(occupant_data));
 
     async_http_request(URL_EVENT_OCCUPANT_LEFT, {
