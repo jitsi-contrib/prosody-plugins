@@ -37,13 +37,6 @@ and `token_affiliation` plugins.
       set jicofo.conference.enable-auto-owner false
   ```
 
-  For old versions, you may set the same value by adding the following line to
-  `/etc/jitsi/jicofo/sip-communicator.properties`
-
-  ```conf
-  org.jitsi.jicofo.DISABLE_AUTO_OWNER=true
-  ```
-
 - Restart the services
 
   ```bash
