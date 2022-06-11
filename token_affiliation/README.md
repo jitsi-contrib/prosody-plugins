@@ -54,7 +54,7 @@ This plugin sets the occupant's affiliation according to the token content.
 
 ## A token sample
 
-Set the affiliation in token. The value may be `owner` or `member`.
+Set `affiliation` in token. The value may be `owner` or `member`.
 
 A sample token body:
 
