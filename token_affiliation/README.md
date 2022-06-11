@@ -54,7 +54,7 @@ This plugin sets the occupant's affiliation according to the token content.
 
 ## A token sample
 
-Set the affiliation on token. The value may be `owner` or `member`.
+Set the affiliation in token. The value may be `owner` or `member`.
 
 A sample token body:
 
@@ -75,3 +75,5 @@ A sample token body:
   }
 }
 ```
+
+You may create test tokens on [jitok](https://jitok.emrah.com/).
