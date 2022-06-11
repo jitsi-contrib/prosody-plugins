@@ -31,20 +31,6 @@ This plugin sets the occupant's affiliation according to the token content.
       set jicofo.conference.enable-auto-owner false
   ```
 
-  For old versions, you may set the same value by adding the following line to
-  `/etc/jitsi/jicofo/sip-communicator.properties`
-
-  ```conf
-  org.jitsi.jicofo.DISABLE_AUTO_OWNER=true
-  ```
-
-- If exists, remove or comment `org.jitsi.jicofo.auth.URL` line in
-  `/etc/jitsi/jicofo/sip-communicator.properties`
-
-  ```conf
-  #org.jitsi.jicofo.auth.URL=...
-  ```
-
 - Restart the services
 
   ```bash
