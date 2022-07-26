@@ -1,16 +1,17 @@
 # Event Sync
 
-This prosody component sends HTTP POST request with JSON payload to external API when occupant or room events are triggered.
+This prosody component sends HTTP POST request with JSON payload to external API when occupant or room events are
+triggered.
 
 If JWT token auth is used, `name`, `email` and `id` from the user context is also included in the JSON
 payload for occupant data.
-
 
 ## Events
 
 ### muc-room-created
 
 When a room is created, `POST ${api_prefix}/events/room/created` is called with JSON payload containing:
+
 * event_name
 * room_name
 * room_jid
@@ -30,6 +31,7 @@ Example:
 ### muc-room-destroyed
 
 When a room is destroyed, `POST ${api_prefix}/events/room/destroyed` is called with JSON payload containing:
+
 * event_name
 * room_name
 * room_jid
@@ -62,6 +64,7 @@ Example:
 ### muc-occupant-joined
 
 When an occupant joins, `POST ${api_prefix}/events/occupant/joined` is called with JSON payload containing:
+
 * event_name
 * room_name
 * room_jid
@@ -96,6 +99,7 @@ When an occupant leaves, `POST ${api_prefix}/events/occupant/left` is called wit
 * room_name
 * room_jid
 * occupant
+    * total_dominant_speaker_time(if include_speaker_stats = true added to component)
     * occupant_jid
     * joined_at
     * left_at
@@ -111,6 +115,7 @@ Example:
   "room_name": "catchup",
   "room_jid": "catchup@conference.meet.mydomain.com",
   "occupant": {
+    "total_dominant_speaker_time": 432,
     "name": "James Barrow",
     "email": "j.barrow@domain.com",
     "id": "00380324-a840-400d-880f-7ee0933b7556",
@@ -121,7 +126,6 @@ Example:
 }
 ```
 
-
 ## Installation
 
 - Copy this script to the Prosody plugins folder. It's the following folder on
@@ -131,23 +135,23 @@ Example:
   cd /usr/share/jitsi-meet/prosody-plugins/
   wget -O mod_event_sync_component.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/event_sync/mod_event_sync_component.lua
   ```
-  
+
 - Add the component to your prosody config.
 
   _/etc/prosody/conf.d/meet.mydomain.com.cfg.lua_
-  
+
   ```lua
   Component "event_sync.meet.mydomain.com" "event_sync_component"
       muc_component = "conference.meet.mydomain.com"
       api_prefix = "http://your.api.server/api"
   ```
-  
+
 - Restart prosody services
 
   ```bash
   systemctl restart prosody.service
   ```
-  
+
 ### Optional config
 
 Here's an example of the prosody config with optional configs values set:
