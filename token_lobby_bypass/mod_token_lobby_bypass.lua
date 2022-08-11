@@ -45,4 +45,6 @@ module:hook("muc-occupant-pre-join", function (event)
         end
     end
 
-end);
+end, -3);
+--- Run just before lobby(priority -4) and members_only (-5).
+--- Must run after token_verification (99), max_occupants (10), allowners (2).
