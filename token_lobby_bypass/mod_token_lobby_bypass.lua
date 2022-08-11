@@ -15,12 +15,16 @@ module:hook("muc-occupant-pre-join", function (event)
     local room, occupant = event.room, event.occupant;
 
     if is_healthcheck_room(room.jid) then
-        module:log(LOGLEVEL, "skip for room %s occupant %s", room.jid, occupant.bare_jid)
+        return;
+    end
+
+    if room._data.lobbyroom == nil then
+        module:log(LOGLEVEL, "skip room with no active lobby - %s", room.jid)
         return;
     end
 
     if not event.origin.auth_token then
-        module:log(LOGLEVEL, "skip user with no token %s", event.origin.from)
+        module:log(LOGLEVEL, "skip user with no token - %s", occupant.bare_jid)
         return
     end
 
