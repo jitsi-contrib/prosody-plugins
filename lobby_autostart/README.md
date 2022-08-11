@@ -2,20 +2,19 @@
 
 This plugin automatically enables the lobby for all rooms. 
 
-:warning: Do not use this plugin unless you have enabled some mechanism for moderators to bypass the lobby. 
-Otherwise, all your users will be stuck in 
+> :warning: Do not use this plugin unless you have enabled some mechanism for moderators to bypass the lobby,
+e.g. a plugin to set default passwords to rooms, or a plugin to
+[bypass lobby based on token attributes](../token_lobby_bypass/). Otherwise, all your users will be stuck in
 the lobby with nobody to admit them.
 
 
 
 ## Installation
 - Prerequisites:
-  - Enable the lobby feature and test that it works as expected when manually
-activated by a moderator. 
+  - Enable the lobby feature and test that it works as expected when manually activated by a moderator.
 
-  - Make sure you have a way for moderators to bypass the lobby e.g. a plugin to set default passwords to rooms, or a plugin 
-to bypass tokens based on JWT token attributes. Test that it works when lobby is activated manually by another moderator.
-
+  - Make sure you have a way for moderators to bypass the lobby  Test that it works when lobby is
+    activated manually by another moderator.
   
 - Copy this script to the Prosody plugins folder. It's the following folder on
   Debian 
