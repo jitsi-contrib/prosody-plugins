@@ -12,6 +12,10 @@
 
   Automatically start recording when the moderator comes into the room.
 
+- [lobby autostart](lobby_autostart/)
+
+  Automatically enables the lobby for all rooms. 
+
 - [time restricted](time_restricted/)
 
   Sets a time limit to the conference.
