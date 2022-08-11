@@ -51,7 +51,7 @@ function run_when_muc_module_loaded(component_host_module, component_host_name, 
         callback(prosody.hosts[component_host_name].modules.muc, component_host_module);
     end
 
-    if prosody.hosts[lobby_muc_component_host].modules.muc == nil then
+    if prosody.hosts[component_host_name].modules.muc == nil then
         module:log('debug', 'MUC module for %s not yet loaded. Will trigger when it is loaded.', component_host_name);
         prosody.hosts[component_host_name].events.add_handler('module-loaded', function(event)
             if (event.module == 'muc') then
