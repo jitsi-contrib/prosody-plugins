@@ -162,7 +162,7 @@ Component "event_sync.meet.mydomain.com" "event_sync_component"
         ["Authorization"] = "Bearer TOKEN-237958623045";
     }
     api_timeout = 10  -- timeout if API does not respond within 10s
-    retry_count = 5  -- retry up to 5 times
+    api_retry_count = 5  -- retry up to 5 times
     api_retry_delay = 1  -- wait 1s between retries
     
     -- change retry rules so we also retry if endpoint returns HTTP 408
