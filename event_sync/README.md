@@ -133,22 +133,22 @@ Example:
 ```
 
 ### Events from breakout rooms
-For breakout room events, `is_breakout` will be `true` and `breakout_room_id` will hold the UUID of the 
+For breakout room events, `is_breakout` will be `true` and `breakout_room_id` will hold the identifier of the
 breakout room. The `room_name` and `roome_id` will still reference the main room.
 
-When an occupant joins a breakout room, she leaves the main room and enters the breakout room. You would therefore 
-expect to see an `muc-occupant-left` event for the main room and a `muc-occupant-joined` event for the 
-breakout room (as well as a `muc-room-created` event if she is the first to join that breakout room).
+When occupants join a breakout room, they leave the main room and enter the breakout room. You would therefore
+expect to see a `muc-occupant-left` event for the main room and a `muc-occupant-joined` event for the
+breakout room (as well as a `muc-room-created` event if the occupant is the first to join that breakout room).
 
-When the occupant leaves a breakout room, she rejoins the main room. You would therefore 
-expect to see an `muc-occupant-left` event for the breakout room and a `muc-occupant-joined` event for the 
-main room (as well as a `muc-room-destroyed` event if she is the last to leave that breakout room).
+When occupants leave a breakout room and rejoins the main room, you would see a `muc-occupant-left` event for the
+breakout room and a `muc-occupant-joined` event for the main room (as well as a `muc-room-destroyed` event if
+the occupant is the last to leave that breakout room).
 
-It is worth noting that breakout rooms are not actually created when moderators create the breakout room in the UI, 
+It is worth noting that breakout rooms are not actually created when moderators create the breakout room in the UI,
 and you would only get a `muc-room-created` event when an occupant moves to the breakout room.
 
 It is also worth noting that the main room is not destroyed when everyone leaves to join a breakout room. It will only
-be destroyed shortly after everyone has left the main room and all associated breakout rooms.
+be destroyed when the main room and all associated breakout rooms are empty.
 
 ## Installation
 
