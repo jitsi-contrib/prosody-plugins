@@ -4,6 +4,7 @@
 --
 --    Component "event_sync.mydomain.com" "event_sync_component"
 --        muc_component = "conference.mydomain.com"
+--        breakout_component = "breakout.mydomain.com"
 --
 --        api_prefix = "http://external_app.mydomain.com/api"
 --
@@ -26,7 +27,10 @@ local http = require "net.http";
 local timer = require 'util.timer';
 local is_healthcheck_room = module:require "util".is_healthcheck_room;
 
-local muc_component_host = module:get_option_string("muc_component");
+local main_muc_component_host = module:get_option_string("muc_component");
+local muc_domain_base = module:get_option_string("muc_mapper_domain_base");
+local breakout_muc_component_host = module:get_option_string("breakout_component", "breakout." .. muc_domain_base);
+
 local api_prefix = module:get_option("api_prefix");
 local api_timeout = module:get_option("api_timeout", 20);
 local api_headers = module:get_option("api_headers");
@@ -48,7 +52,7 @@ if not api_prefix then
     return;
 end
 
-if muc_component_host == nil then
+if main_muc_component_host == nil then
     log("error", "No muc_component specified. No muc to operate on!");
     return;
 end
@@ -199,6 +203,16 @@ function is_system_event(event)
     return false;
 end
 
+--- Updates payload with additional attributes from room._data.event_sync_extra_payload
+function update_with_room_attributes(payload, room)
+    if room._data and room._data.event_sync_extra_payload then
+        for k,v in pairs(room._data.event_sync_extra_payload) do
+            payload[k] = v;
+        end
+    end
+end
+
+
 --- Callback when new room created
 function room_created(event)
     if is_system_event(event) then
@@ -211,15 +225,16 @@ function room_created(event)
     local room_data = new_EventData(room.jid);
     room.event_data = room_data;
 
+    local payload = {
+        ['event_name'] = 'muc-room-created';
+        ['created_at'] = room_data.created_at;
+    };
+    update_with_room_attributes(payload, room);
+
     async_http_request(URL_EVENT_ROOM_CREATED, {
         headers = http_headers;
         method = "POST";
-        body = json.encode({
-            ['event_name'] = 'muc-room-created';
-            ['room_name'] = room_data.room_name;
-            ['room_jid'] = room_data.room_jid;
-            ['created_at'] = room_data.created_at;
-        });
+        body = json.encode(payload);
     })
 end
 
@@ -240,17 +255,18 @@ function room_destroyed(event)
         return;
     end
 
-    async_http_request(URL_EVENT_ROOM_DESTROYED, {
-        headers = http_headers;
-        method = "POST";
-        body = json.encode({
+    local payload = {
             ['event_name'] = 'muc-room-destroyed';
-            ['room_name'] = room_data.room_name;
-            ['room_jid'] = room_data.room_jid;
             ['created_at'] = room_data.created_at;
             ['destroyed_at'] = destroyed_at;
             ['all_occupants'] = room_data:get_occupant_array();
-        })
+    };
+    update_with_room_attributes(payload, room);
+
+    async_http_request(URL_EVENT_ROOM_DESTROYED, {
+        headers = http_headers;
+        method = "POST";
+        body = json.encode(payload);
     })
 end
 
@@ -272,17 +288,17 @@ function occupant_joined(event)
     local occupant_data = room_data:on_occupant_joined(occupant_jid, event.origin);
     module:log("info", "New occupant - %s", json.encode(occupant_data));
 
+    local payload = {
+            ['event_name'] = 'muc-occupant-joined';
+            ['occupant'] = occupant_data;
+    };
+    update_with_room_attributes(payload, room);
+
     async_http_request(URL_EVENT_OCCUPANT_JOINED, {
         headers = http_headers;
         method = "POST";
-        body = json.encode({
-            ['event_name'] = 'muc-occupant-joined';
-            ['room_name'] = room_data.room_name;
-            ['room_jid'] = room_data.room_jid;
-            ['occupant'] = occupant_data;
-        })
+        body = json.encode(payload);
     })
-
 end
 
 --- Callback when an occupant has left room
@@ -304,37 +320,136 @@ function occupant_left(event)
     local occupant_data = room_data:on_occupant_leave(occupant_jid, room);
     module:log("info", "Occupant left - %s", json.encode(occupant_data));
 
+    local payload = {
+            ['event_name'] = 'muc-occupant-left';
+            ['occupant'] = occupant_data;
+    };
+    update_with_room_attributes(payload, room);
+
     async_http_request(URL_EVENT_OCCUPANT_LEFT, {
         headers = http_headers;
         method = "POST";
-        body = json.encode({
-            ['event_name'] = 'muc-occupant-left';
-            ['room_name'] = room_data.room_name;
-            ['room_jid'] = room_data.room_jid;
-            ['occupant'] = occupant_data;
-        })
+        body = json.encode(payload);
     })
 end
 
 
---- Register callbacks on muc events when MUC component is connected
-function process_host(host)
-    if host == muc_component_host then -- the conference muc component
-        module:log("info","Hook to muc events on %s", host);
+-- Helper function to wait till a component is loaded before running the given callback
+function run_when_component_loaded(component_host_name, callback)
+    local function trigger_callback()
+        module:log('info', 'Component loaded %s', component_host_name);
+        callback(module:context(component_host_name), component_host_name);
+    end
 
-        local muc_module = module:context(host);
-        muc_module:hook("muc-room-created", room_created, -1);
-        muc_module:hook("muc-occupant-joined", occupant_joined, -1);
-        muc_module:hook("muc-occupant-left", occupant_left, -1);
-        muc_module:hook("muc-room-destroyed", room_destroyed, -1);
+    if prosody.hosts[component_host_name] == nil then
+        module:log('debug', 'Host %s not yet loaded. Will trigger when it is loaded.', component_host_name);
+        prosody.events.add_handler('host-activated', function (host)
+            if host == component_host_name then
+                trigger_callback();
+            end
+        end);
+    else
+        trigger_callback();
     end
 end
 
-if prosody.hosts[muc_component_host] == nil then
-    module:log("info","No muc component found, will listen for it: %s", muc_component_host)
+-- Helper function to wait till a component's muc module is loaded before running the given callback
+function run_when_muc_module_loaded(component_host_module, component_host_name, callback)
+    local function trigger_callback()
+        module:log('info', 'MUC module loaded for %s', component_host_name);
+        callback(prosody.hosts[component_host_name].modules.muc, component_host_module);
+    end
 
-    -- when a host or component is added
-    prosody.events.add_handler("host-activated", process_host);
-else
-    process_host(muc_component_host);
+    if prosody.hosts[component_host_name].modules.muc == nil then
+        module:log('debug', 'MUC module for %s not yet loaded. Will trigger when it is loaded.', component_host_name);
+        prosody.hosts[component_host_name].events.add_handler('module-loaded', function(event)
+            if (event.module == 'muc') then
+                trigger_callback();
+            end
+        end);
+    else
+        trigger_callback()
+    end
 end
+
+
+-- No easy way to infer main room from breakout room object, so search all rooms in main muc component and cache
+-- it on room so we don't have to search again
+-- Speakerstats component does exactly the same thing, so if that is loaded, we get this for free.
+local function get_main_room(breakout_room)
+    if breakout_room._data and breakout_room._data.main_room then
+        return breakout_room._data.main_room;
+    end
+
+    -- let's search all rooms to find the main room
+    for room in main_muc_service.each_room() do
+        if room._data and room._data.breakout_rooms_active and room._data.breakout_rooms[breakout_room.jid] then
+            breakout_room._data.main_room = room;
+            return room;
+        end
+    end
+end
+
+
+-- Predefine room attributes to be included in API payload for all events
+function handle_main_room_created(event)
+    local room = event.room;
+    if is_healthcheck_room(room.jid) then
+        return;
+    end
+
+    room._data.event_sync_extra_payload = {
+        ['is_breakout'] = false;
+        ['room_jid'] = room.jid;
+        ['room_name'] = jid.split(room.jid);
+    }
+    room:save();
+end
+
+local main_muc_service;
+
+-- Predefine breakout room attributes to be included in API payload for all events
+-- This should be scheduled AFTER speakerStats module, but BEFORE handler that compiles and sends API payload
+function handle_breakout_room_created(event)
+    local room = event.room;
+    if is_healthcheck_room(room.jid) then
+        return;
+    end
+
+    local main_room = get_main_room(room);
+    room._data.event_sync_extra_payload = {
+        ['is_breakout'] = true;
+        ['breakout_room_id'] = jid.split(room.jid);
+        -- use name/jid of parent room as the room_* info
+        ['room_jid'] = main_room.jid;
+        ['room_name'] = jid.split(main_room.jid);
+    }
+    room:save();
+end
+
+-- Handle events on main muc module
+run_when_component_loaded(main_muc_component_host, function(host_module, host_name)
+    run_when_muc_module_loaded(host_module, host_name, function (main_muc, main_module)
+        main_muc_service = main_muc;  -- so it can be accessed from breakout muc event handlers
+
+        -- the following must run after speakerstats (priority -1)
+        host_module:hook("muc-room-created", handle_main_room_created, -2);
+        host_module:hook("muc-room-created", room_created, -3);  -- must run after handle_main_room_created
+        host_module:hook("muc-occupant-joined", occupant_joined, -2);
+        host_module:hook("muc-occupant-left", occupant_left, -2);
+        host_module:hook("muc-room-destroyed", room_destroyed, -2);
+    end);
+end);
+
+-- Handle events on breakout muc module
+run_when_component_loaded(breakout_muc_component_host, function(host_module, host_name)
+    run_when_muc_module_loaded(host_module, host_name, function (breakout_muc, breakout_module)
+
+        -- the following must run after speakerstats (priority -1)
+        host_module:hook("muc-room-created", handle_breakout_room_created, -2);
+        host_module:hook("muc-room-created", room_created, -3); -- must run after handle_breakout_room_created
+        host_module:hook("muc-occupant-joined", occupant_joined, -2);
+        host_module:hook("muc-occupant-left", occupant_left, -2);
+        host_module:hook("muc-room-destroyed", room_destroyed, -2);
+    end);
+end);
