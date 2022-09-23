@@ -28,6 +28,10 @@
 
   Enables some users to bypass lobby based on token content.
 
+- [token_lobby_ondemand](token_lobby_ondemand/)
+
+  Selectively send users to lobby based on token content. Enables lobby automatically if not yet activated.
+
 - [token owner party](token_owner_party/)
 
   Prevents the unauthorized users to create a room and terminates the conference
