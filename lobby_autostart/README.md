@@ -16,6 +16,13 @@ the lobby with nobody to admit them.
   - Make sure you have a way for moderators to bypass the lobby  Test that it works when lobby is
     activated manually by another moderator.
   
+  - Check that you have `/usr/share/jitsi-meet/prosody-plugins/mod_persistent_lobby.lua`. If it's not there, that means
+    your version of Jitsi does not yet include [this PR](https://github.com/jitsi/jitsi-meet/pull/12215) which is required.
+    - If upgrading Jitsi is not an option for you, you can still use the
+      [older version of mod_lobby_autostart](https://github.com/jitsi-contrib/prosody-plugins/blob/ef33075897344bfb18e99bc7e56443bdb3027806/lobby_autostart/mod_lobby_autostart.lua)
+      which does not require mod_persistent_lobby.
+  
+
 - Copy this script to the Prosody plugins folder. It's the following folder on
   Debian 
 
@@ -24,12 +31,19 @@ the lobby with nobody to admit them.
    wget -O mod_lobby_autostart.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/lobby_autostart/mod_lobby_autostart.lua
    ```
   
-- Enable module in your prosody config.
+- Enable the module in your prosody config, as well as the 'persistent_lobby' module.
 
   _/etc/prosody/conf.d/meet.mydomain.com.cfg.lua_
 
   ```lua
-  VirtualHost "meet.mydomain.com"
+  Virtualhost "meet.mydomain.com"
+    modules_enabled = {
+      -- ...
+      "muc_lobby_rooms";
+      "persistent_lobby";
+    }
+  
+  Component "conference.meet.mydomain.com" "muc"
     modules_enabled = {
       -- ... existing modules
       "lobby_autostart";
