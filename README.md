@@ -24,11 +24,11 @@
 
   Sets the occupant's affiliation according to the token content.
 
-- [token_lobby_bypass](token_lobby_bypass/)
+- [token lobby bypass](token_lobby_bypass/)
 
   Enables some users to bypass lobby based on token content.
 
-- [token_lobby_ondemand](token_lobby_ondemand/)
+- [token lobby ondemand](token_lobby_ondemand/)
 
   Selectively send users to lobby based on token content. Enables lobby automatically if not yet activated.
 
