@@ -59,7 +59,7 @@ when it is required.
 ## A token sample
 
 To send a user to the lobby (and activate lobby if it is not yet activated), set the `lobby` attribute to 
-boolean `true` in `context.features`.
+boolean `true` in `context.user`.
 
 A sample token body:
 
@@ -70,8 +70,6 @@ A sample token body:
     "user": {
       "name": "myname",
       "email": "myname@mydomain.com",
-    },
-    "features": {
       "lobby": true
     }
   },

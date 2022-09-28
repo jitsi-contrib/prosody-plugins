@@ -36,7 +36,7 @@ This plugin allows you to let some users bypass the lobby by setting a flag in t
 
 ## A token sample
 
-To allow a user to bypass the lobby, set the `lobby_bypass` attribute to boolean `true` in `context.features`.
+To allow a user to bypass the lobby, set the `lobby_bypass` attribute to boolean `true` in `context.user`.
 
 A sample token body:
 
@@ -47,8 +47,6 @@ A sample token body:
     "user": {
       "name": "myname",
       "email": "myname@mydomain.com",
-    },
-    "features": {
       "lobby_bypass": true
     }
   },
