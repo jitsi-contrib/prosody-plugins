@@ -22,7 +22,7 @@ module:hook("muc-occupant-pre-join", function (event)
         return
     end
 
-    local context = event.origin.jitsi_meet_context_features;
+    local context = event.origin.jitsi_meet_context_user;
     local user_should_use_lobby = (context ~= nil and context["lobby"] == true);
     local lobby_enabled = (room._data.lobbyroom ~= nil);
 
