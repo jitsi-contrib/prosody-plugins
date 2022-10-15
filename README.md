@@ -16,6 +16,10 @@
 
   Automatically enables the lobby for all rooms. 
 
+- [per room max occupants](per_room_max_occupants/)
+
+  Extends the capabilities of mod_muc_max_occupants by allowing different max occupancy based on the room name or subdomain.
+
 - [time restricted](time_restricted/)
 
   Sets a time limit to the conference.
