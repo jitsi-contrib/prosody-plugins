@@ -32,8 +32,8 @@ based on the room name or subdomain.
     --- configure you overrides --
   
     max_occupants_for_rooms = {   -- define this to set limit for specific rooms
-      DetentionRoom = 30;  -- increase limit for "/DetentionRoom" to 30  
-      ["[classroom]CS101"] = 100;  -- increase limit for "/classroom/CS101" to 100
+      detention = 30;  -- increase limit for "/detention" to 30
+      ["[classroom]cs101"] = 100;  -- increase limit for "/classroom/cs101" to 100
     }
   
     max_occupants_for_subdomains = {   -- define this to set limits based on subdomain
@@ -43,7 +43,7 @@ based on the room name or subdomain.
   ```
 
   If a room matches entries in both `max_occupants_for_rooms` and `max_occupants_for_subdomains` -- e.g. in the 
-  case of `/classroom/CS101` in the example config above -- then `max_occupants_for_rooms` takes precedence.
+  case of `/classroom/cs101` in the example config above -- then `max_occupants_for_rooms` takes precedence.
 
 
 - Restart prosody
