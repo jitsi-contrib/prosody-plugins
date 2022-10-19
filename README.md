@@ -14,11 +14,12 @@
 
 - [lobby autostart](lobby_autostart/)
 
-  Automatically enables the lobby for all rooms. 
+  Automatically enables the lobby for all rooms.
 
 - [per room max occupants](per_room_max_occupants/)
 
-  Extends the capabilities of mod_muc_max_occupants by allowing different max occupancy based on the room name or subdomain.
+  Extends the capabilities of mod_muc_max_occupants by allowing different max
+  occupancy based on the room name or subdomain.
 
 - [secure_domain lobby bypass](secure_domain_lobby_bypass/)
 
@@ -38,7 +39,8 @@
 
 - [token lobby ondemand](token_lobby_ondemand/)
 
-  Selectively send users to lobby based on token content. Enables lobby automatically if not yet activated.
+  Selectively send users to lobby based on token content. Enables lobby
+  automatically if not yet activated.
 
 - [token owner party](token_owner_party/)
 
