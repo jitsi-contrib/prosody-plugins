@@ -19,6 +19,6 @@ module:hook("muc-room-pre-create", function (event)
         return;
     end
 
-    prosody.events.fire_event("create-lobby-room", { room = room; });
+    prosody.events.fire_event("create-persistent-lobby-room", { room = room; });
 end);
 
