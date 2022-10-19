@@ -20,6 +20,10 @@
 
   Extends the capabilities of mod_muc_max_occupants by allowing different max occupancy based on the room name or subdomain.
 
+- [secure_domain lobby bypass](secure_domain_lobby_bypass/)
+
+  Enables some users to bypass lobby based on the authentiation.
+
 - [time restricted](time_restricted/)
 
   Sets a time limit to the conference.
