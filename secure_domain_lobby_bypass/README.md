@@ -3,6 +3,8 @@
 This plugin allows you to let some users bypass the lobby based on the
 authentication.
 
+> This module works only for BOSH clients. It doesn't support `XMPP websocket`.
+
 ## Installation
 
 - Set up
