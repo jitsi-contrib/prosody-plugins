@@ -24,7 +24,7 @@ the lobby with nobody to admit them.
 
    ```bash
    cd /usr/share/jitsi-meet/prosody-plugins/
-   wget -O mod_lobby_autostart.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/ef33075897344bfb18e99bc7e56443bdb3027806/lobby_autostart/mod_lobby_autostart.lua
+   wget -O mod_lobby_autostart.lua https://gist.githubusercontent.com/shawnchin/8d853a500d9f4ab52118a0d79e37fe83/raw/8e58b8ecb0c60db7bc19a918a9693063369916d3/mod_lobby_autostart.lua
    ```
   
 - Enable module in your prosody config.
