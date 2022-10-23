@@ -29,14 +29,14 @@ module:hook("muc-occupant-pre-join", function (event)
     if lobby_enabled then
         -- If lobby already enabled, exclude user from lobby if necessary
         if not user_should_use_lobby then
-            module:log(DEBUG, "Bypassing lobby for room %s occupant %s", room.jid, occupant.bare_jid);
+            module:log(LOGLEVEL, "Bypassing lobby for room %s occupant %s", room.jid, occupant.bare_jid);
 
             occupant.role = 'participant';
 
             -- set affiliation to "member" if not yet assigned by other plugins
             local affiliation = room:get_affiliation(occupant.bare_jid);
             if valid_affiliations[affiliation or "none"] < valid_affiliations.member then
-                module:log(DEBUG, "Setting affiliation for %s -> member", occupant.bare_jid);
+                module:log(LOGLEVEL, "Setting affiliation for %s -> member", occupant.bare_jid);
                 room:set_affiliation(true, occupant.bare_jid, 'member');
             end
         end
