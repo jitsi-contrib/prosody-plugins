@@ -46,7 +46,7 @@ when it is required.
   Component "conference.meet.mydomain.com" "muc"
     modules_enabled = {
       -- ... existing modules
-      "token_lobby_bypass";
+      "token_lobby_ondemand";
     }
   ```
 
