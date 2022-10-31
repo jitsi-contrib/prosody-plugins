@@ -33,6 +33,10 @@
 
   Sets the occupant's affiliation according to the token content.
 
+- [token no wildcard](token_no_wildcard/)
+
+  Enforces single room per token by rejecting tokens that use wildcards or regex-based room names.
+
 - [token lobby bypass](token_lobby_bypass/)
 
   Enables some users to bypass lobby based on token content.
