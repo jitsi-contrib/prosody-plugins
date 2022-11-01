@@ -26,7 +26,9 @@ module:hook("muc-occupant-pre-join", function (event)
     if context_user then
         if context_user["affiliation"] == "owner" or
            context_user["affiliation"] == "moderator" or
-           context_user["affiliation"] == "teacher" then
+           context_user["affiliation"] == "teacher" or
+           context_user["moderator"] == "true" or
+           context_user["moderator"] == true then
             module:log(LOGLEVEL, "let the party begin")
             return
         end
