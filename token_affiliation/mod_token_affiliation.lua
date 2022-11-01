@@ -31,6 +31,10 @@ module:hook("muc-occupant-joined", function (event)
             affiliation = "owner"
         elseif context_user["affiliation"] == "teacher" then
             affiliation = "owner"
+        elseif context_user["moderator"] == "true" then
+            affiliation = "owner"
+        elseif context_user["moderator"] == true then
+            affiliation = "owner"
         end
     end
 
