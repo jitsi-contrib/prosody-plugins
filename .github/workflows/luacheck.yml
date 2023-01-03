@@ -12,5 +12,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - name: Install luacheck
+            - name: Install luarocks
               run: sudo apt-get --install-recommends -y install luarocks
+            - name: Install luacheck
+              run: sudo luarocks install luacheck
