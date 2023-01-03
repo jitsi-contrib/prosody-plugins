@@ -58,7 +58,7 @@ module:hook("muc-occupant-joined", function (event)
     if is_healthcheck_room(room.jid) or _is_admin(occupant.jid) then
         return
     end
- 
+
     -- wait for the affiliation to set then start recording if applicable
     timer.add_task(3, function()
         _start_recording(room, session, occupant.jid)
