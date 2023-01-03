@@ -27,7 +27,7 @@ module:hook("muc-occupant-pre-join", function (event)
     end
 
     -- search for authentication response
-    for k, v in pairs(event.origin.bosh_responses) do
+    for _, v in pairs(event.origin.bosh_responses) do
         if string.match(v, "identity='.-'") then
             module:log(LOGLEVEL, "Bypassing lobby for room %s occupant %s",
                 room.jid, occupant.bare_jid);
