@@ -62,7 +62,7 @@ module:hook("muc-room-pre-create", function(event)
 end, 100);  --- run before mod_token_verification (99)
 
 module:hook("muc-occupant-pre-join", function(event)
-    local origin, room, stanza = event.origin, event.room, event.stanza;
+    local origin, stanza = event.origin, event.stanza;
     if not verify_no_wildcard_in_token(origin, stanza) then
         return true; -- Returning any value other than nil will halt processing of the event
     end
