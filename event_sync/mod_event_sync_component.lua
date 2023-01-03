@@ -83,15 +83,15 @@ local URL_EVENT_OCCUPANT_LEFT = api_prefix..'/events/occupant/left';
 local function async_http_request(url, options, callback, timeout_callback, retries)
     local completed = false;
     local timed_out = false;
-    local retries = retries or api_retry_count;
+    local _retries = retries or api_retry_count;
 
     local function cb_(response_body, response_code)
         if not timed_out then  -- request completed before timeout
             completed = true;
-            if (response_code == 0 or api_should_retry_for_code(response_code)) and retries > 0 then
+            if (response_code == 0 or api_should_retry_for_code(response_code)) and _retries > 0 then
                 module:log("warn", "API Response code %d. Will retry after %ds", response_code, api_retry_delay);
                 timer.add_task(api_retry_delay, function()
-                    async_http_request(url, options, callback, timeout_callback, retries - 1)
+                    async_http_request(url, options, callback, timeout_callback, _retries - 1)
                 end)
                 return;
             end
