@@ -12,7 +12,12 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
+
             - name: Install luarocks
               run: sudo apt-get --install-recommends -y install luarocks
+
             - name: Install luacheck
               run: sudo luarocks install luacheck
+
+            - name: Check lua codes
+              run: luacheck -g $(find -name '*.lua')
