@@ -406,7 +406,7 @@ function handle_main_room_created(event)
     room:save();
 end
 
-local main_muc_service;
+local main_muc_service; -- luacheck: ignore
 
 -- Predefine breakout room attributes to be included in API payload for all events
 -- This should be scheduled AFTER speakerStats module, but BEFORE handler that compiles and sends API payload
@@ -433,23 +433,23 @@ run_when_component_loaded(main_muc_component_host, function(host_module, host_na
         main_muc_service = main_muc;  -- so it can be accessed from breakout muc event handlers
 
         -- the following must run after speakerstats (priority -1)
-        host_module:hook("muc-room-created", handle_main_room_created, -2);
-        host_module:hook("muc-room-created", room_created, -3);  -- must run after handle_main_room_created
-        host_module:hook("muc-occupant-joined", occupant_joined, -2);
-        host_module:hook("muc-occupant-left", occupant_left, -2);
-        host_module:hook("muc-room-destroyed", room_destroyed, -2);
+        main_module:hook("muc-room-created", handle_main_room_created, -2);
+        main_module:hook("muc-room-created", room_created, -3);  -- must run after handle_main_room_created
+        main_module:hook("muc-occupant-joined", occupant_joined, -2);
+        main_module:hook("muc-occupant-left", occupant_left, -2);
+        main_module:hook("muc-room-destroyed", room_destroyed, -2);
     end);
 end);
 
 -- Handle events on breakout muc module
 run_when_component_loaded(breakout_muc_component_host, function(host_module, host_name)
-    run_when_muc_module_loaded(host_module, host_name, function (breakout_muc, breakout_module)
+    run_when_muc_module_loaded(host_module, host_name, function (_, breakout_module)
 
         -- the following must run after speakerstats (priority -1)
-        host_module:hook("muc-room-created", handle_breakout_room_created, -2);
-        host_module:hook("muc-room-created", room_created, -3); -- must run after handle_breakout_room_created
-        host_module:hook("muc-occupant-joined", occupant_joined, -2);
-        host_module:hook("muc-occupant-left", occupant_left, -2);
-        host_module:hook("muc-room-destroyed", room_destroyed, -2);
+        breakout_module:hook("muc-room-created", handle_breakout_room_created, -2);
+        breakout_module:hook("muc-room-created", room_created, -3); -- must run after handle_breakout_room_created
+        breakout_module:hook("muc-occupant-joined", occupant_joined, -2);
+        breakout_module:hook("muc-occupant-left", occupant_left, -2);
+        breakout_module:hook("muc-room-destroyed", room_destroyed, -2);
     end);
 end);
