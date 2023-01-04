@@ -406,7 +406,7 @@ function handle_main_room_created(event)
     room:save();
 end
 
-local main_muc_service; -- luacheck: ignore
+local main_muc_service; 
 
 -- Predefine breakout room attributes to be included in API payload for all events
 -- This should be scheduled AFTER speakerStats module, but BEFORE handler that compiles and sends API payload
