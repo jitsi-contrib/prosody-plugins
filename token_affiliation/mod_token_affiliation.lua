@@ -10,7 +10,6 @@ end
 
 module:hook("muc-occupant-joined", function (event)
     local room, occupant = event.room, event.occupant
-    local luacheck_test
 
     if is_healthcheck_room(room.jid) or _is_admin(occupant.jid) then
         module:log(LOGLEVEL, "skip affiliation, %s", occupant.jid)
