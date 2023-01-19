@@ -35,4 +35,4 @@ module.
 
 ## Sponsors
 
-[![Nordeck](images/nordeck.png)](https://nordeck.net/)
+[![Nordeck](/images/nordeck.png)](https://nordeck.net/)
