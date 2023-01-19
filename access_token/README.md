@@ -32,3 +32,7 @@ module.
   ```bash
   systemctl restart prosody.service
   ```
+
+## Sponsors
+
+[![Nordeck](images/nordeck.png)](https://nordeck.net/)
