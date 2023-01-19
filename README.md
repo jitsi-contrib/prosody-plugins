@@ -1,5 +1,10 @@
 # Prosody plugins
 
+- [access_token](access_token/)
+
+  Provides a token that proves its owner is a participant of an ongoing `Jitsi`
+  meeting.
+
 - [event sync](event_sync/)
 
   Sends HTTP POST to external API when occupant or room events triggered.
@@ -35,7 +40,8 @@
 
 - [token no wildcard](token_no_wildcard/)
 
-  Enforces single room per token by rejecting tokens that use wildcards or regex-based room names.
+  Enforces single room per token by rejecting tokens that use wildcards or
+  regex-based room names.
 
 - [token lobby bypass](token_lobby_bypass/)
 

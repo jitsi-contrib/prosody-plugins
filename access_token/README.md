@@ -1,7 +1,7 @@
 # Access Token
 
-This plugin provides a token that proves its owner is a participant in the
-`Jitsi` meeting room.
+This plugin provides a token that proves its owner is a participant of an
+ongoing `Jitsi` meeting.
 
 Let's say you have an API service and you want to allow the user to send
 requests if they are an active user of a meeting. In this case, you may use this
@@ -72,7 +72,7 @@ Put this into `/usr/share/jitsi-meet/body.html` and run the following command on
 the browser console after joining the meeting:
 
 ```javascript
-getToken()
+getToken();
 ```
 
 ## Sponsors
