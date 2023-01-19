@@ -24,7 +24,14 @@ module.
   ```lua
   Component "conference.meet.mydomain.com" "muc"
     modules_enabled = {
+      ...
+      ...
       "access_token";
+    }
+
+    access_token_key = "mysecretkey"
+    access_token_alg = "HS256"
+    access_token_exp = 60
   ```
 
 - Restart the services
