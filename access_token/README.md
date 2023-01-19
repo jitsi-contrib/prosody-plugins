@@ -4,8 +4,8 @@ This plugin provides a token that proves its owner is a participant of an
 ongoing `Jitsi` meeting.
 
 Let's say you have an API service and you want to allow this service to accept
-requests from the user only if they are an active user of a meeting. In this
-case, you may use this module.
+requests from the user only if they are an active participant of a meeting. In
+this case, you may use this module.
 
 ## Installation
 
