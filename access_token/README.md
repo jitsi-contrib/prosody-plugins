@@ -40,6 +40,41 @@ module.
   systemctl restart prosody.service
   ```
 
+## Token request
+
+Send an `XMPP query` to get the token.
+
+A sample `javascript` code:
+
+```javascript
+<script>
+function getToken() {
+  const NS_ACCESS_TOKEN = "http://jabber.org/protocol/muc#access-token";
+  const iq = $iq({
+    type: "get",
+    to: APP.conference._room.room.focusMucJid,
+  });
+
+  iq.c("query", { xmlns: NS_ACCESS_TOKEN });
+
+  APP.connection.xmpp.connection.sendIQ(iq, (result) => {
+    const token_data = $(result).find("token").attr("data");
+
+    console.log(`token: ${token_data}`);
+  }, (error) => {
+    console.error(error);
+  });
+}
+</script>
+```
+
+Put this into `/usr/share/jitsi-meet/body.html` and run the following command on
+the browser console after joining the meeting:
+
+```javascript
+getToken()
+```
+
 ## Sponsors
 
 [![Nordeck](/images/nordeck.png)](https://nordeck.net/)
