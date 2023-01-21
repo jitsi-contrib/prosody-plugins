@@ -68,11 +68,24 @@ function getToken() {
 </script>
 ```
 
-Put this into `/usr/share/jitsi-meet/body.html` and run the following command on
-the browser console after joining the meeting:
+Put the sample code into `/usr/share/jitsi-meet/body.html` and run the following
+command on the browser console after joining the meeting:
 
 ```javascript
 getToken();
+```
+
+## Payload
+
+A sample payload:
+
+```json
+{
+  "exp": 1674310904,
+  "host": "jitsi.mydomain.corp",
+  "room": "myroom",
+  "userJid": "0eaittkkaaduafyq@jitsi.mydomain.corp/yMZO0YX8"
+}
 ```
 
 ## Sponsors
