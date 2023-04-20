@@ -13,7 +13,7 @@ the lobby with nobody to admit them.
 - Prerequisites:
   - Enable the lobby feature and test that it works as expected when manually activated by a moderator.
 
-  - Make sure you have a way for moderators to bypass the lobby  Test that it works when lobby is
+  - Make sure you have a way for moderators to bypass the lobby. Test that it works when lobby is
     activated manually by another moderator.
   
   - Check that you have `/usr/share/jitsi-meet/prosody-plugins/mod_persistent_lobby.lua`. If it's not there, that means

@@ -16,7 +16,7 @@ the lobby with nobody to admit them.
 - Prerequisites:
   - Enable the lobby feature and test that it works as expected when manually activated by a moderator.
 
-  - Make sure you have a way for moderators to bypass the lobby  Test that it works when lobby is
+  - Make sure you have a way for moderators to bypass the lobby. Test that it works when lobby is
     activated manually by another moderator.
   
 - Copy this script to the Prosody plugins folder. It's the following folder on
