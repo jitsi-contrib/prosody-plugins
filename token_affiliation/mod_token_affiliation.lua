@@ -42,8 +42,9 @@ module:hook("muc-occupant-joined", function (event)
     module:log(LOGLEVEL, "affiliation: %s", affiliation)
     room:set_affiliation(true, occupant.bare_jid, affiliation)
 
-    -- overwrite the jicofo affiliation after 0.5 sec
-    timer.add_task(0.5, function()
+    -- overwrite the jicofo affiliation after 1.5 sec
+    -- this second set is needed when the authentication is enabled on jicofo
+    timer.add_task(1.5, function()
         module:log(LOGLEVEL, "overwrite affiliation: %s", affiliation)
         room:set_affiliation(true, occupant.bare_jid, affiliation)
     end)
