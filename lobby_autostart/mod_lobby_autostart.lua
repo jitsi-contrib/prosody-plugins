@@ -3,9 +3,7 @@
 -- IMPORTANT: do not use this unless you have some mechanism for moderators to bypass the lobby, otherwise everybody
 --            stops at the lobby with nobody to admit them.
 --
--- This module should be added to the main virtual host domain.
--- It assumes you have properly configured the muc_lobby_rooms module and lobby muc component.
---
+-- This module should be added to the main muc component.
 --
 
 local util = module:require "util";
