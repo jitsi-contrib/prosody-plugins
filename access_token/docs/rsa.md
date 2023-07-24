@@ -9,7 +9,7 @@ This module supports the following asymmetric algorithms:
 ## Generating private/public key pair
 
 ```bash
-ssh-keygen -t rsa -b 4096 -E SHA256 -P "" -m PEM -f myauth
+openssl genrsa -out myauth 4096
 openssl rsa -in myauth -pubout -outform PEM -out myauth.pub
 ```
 
