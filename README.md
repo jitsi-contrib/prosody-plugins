@@ -5,6 +5,11 @@
   Provides a token that proves its owner is a participant of an ongoing `Jitsi`
   meeting.
 
+- [auth_hybrid_matrix_token](auth_hybrid_matrix_token/)
+
+  Provides an authentication provider for `Prosody` which supports `Matrix` and
+  standard `Jitsi` token at the same time.
+
 - [event sync](event_sync/)
 
   Sends HTTP POST to external API when occupant or room events triggered.

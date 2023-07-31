@@ -34,8 +34,8 @@ and handles it depending on its type.
     -- Element's Jitsi widget. It allows all issuers by default.
     -- uvs_issuer = "myissuer"
 
-    -- (optional) UVS auth token, if authentication enabled on UVS
-    -- Uncomment and set the right token if necessary
+    -- (optional) UVS auth token, if authentication enabled on UVS.
+    -- Uncomment and set the right token if necessary.
     --uvs_auth_token = "changeme"
 
     -- (optional) Make Matrix room moderators owners of the Jitsi room.
