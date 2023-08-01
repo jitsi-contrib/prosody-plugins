@@ -1,4 +1,10 @@
+-- -----------------------------------------------------------------------------
 -- Hybrid Matrix-Token authentication
+-- -----------------------------------------------------------------------------
+-- This module is an authentication provider for Prosody which supports Matrix
+-- and standard Jitsi token at the same time. It senses the type of the token
+-- and handles it depending on its type.
+-- -----------------------------------------------------------------------------
 local async = require "util.async"
 local basexx = require 'basexx'
 local cjson_safe  = require 'cjson.safe'
