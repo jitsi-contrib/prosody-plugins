@@ -18,7 +18,7 @@
 local basexx = require 'basexx'
 local is_admin = require "core.usermanager".is_admin
 local is_healthcheck_room = module:require "util".is_healthcheck_room
-local jid = require 'util.jid';
+local jid_split = require "util.jid".split
 local timer = require "util.timer"
 local LOGLEVEL = "debug"
 
@@ -39,7 +39,7 @@ module:hook("muc-occupant-joined", function (event)
         return
     end
 
-    local roomName, _ = jid.split(room.jid)
+    local roomName, _ = jid_split(room.jid)
     local roomId = basexx.from_base32(roomName)
     if not roomId then
         module:log(LOGLEVEL, "skip affiliation, cannot decode the room name")
