@@ -1,12 +1,12 @@
 # Hybrid Matrix Token
 
-This is an authentication module for `Prosody` which supports `Matrix` and
-standard `Jitsi` token at the same time. The module senses the type of the token
-and handles it depending on its type.
+This module is an authentication provider for `Prosody` which supports `Matrix`
+and standard `Jitsi` token at the same time. The module senses the type of the
+token and handles it depending on its type.
 
 ## Installation
 
-- Copy this script to the Prosody plugins folder. It's the following folder on
+- Copy the module into the Prosody plugins folder. It's the following folder on
   Debian:
 
   ```bash
@@ -38,6 +38,25 @@ and handles it depending on its type.
     -- Uncomment and set the right token if necessary.
     --uvs_auth_token = "changeme"
     }
+  ```
+
+- Affiliation (power level)
+
+  Use `matrix_affiliation` to synchronise Jitsi affiliation according to Matrix
+  power level:
+
+  ```bash
+  cd /usr/share/jitsi-meet/prosody-plugins/
+  wget -O mod_matrix_affiliation.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/auth_hybrid_matrix_token/mod_matrix_affiliation.lua
+  ```
+
+  _/etc/prosody/conf.d/meet.mydomain.com.cfg.lua_
+
+  ```lua
+  Component "conference.meet.mydomain.com" "muc"
+      modules_enabled = {
+          "matrix_affiliation";
+      }
   ```
 
 - Restart the services
