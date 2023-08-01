@@ -37,9 +37,6 @@ if uvsAuthToken == nil then
     )
 end
 
-local uvsSyncPowerLevels = module:get_option("uvs_sync_power_levels", false)
-module:log("info", "uvsSyncPowerLevels = %s", uvsSyncPowerLevels)
-
 -- define auth provider
 local provider = {}
 
@@ -170,10 +167,9 @@ local function is_user_in_room(session, matrixPayload)
     session.matrix_affiliation = "member"
     session.auth_matrix_user_verification_is_owner = false
     if
-        uvsSyncPowerLevels and httpRes.power_levels and
-        httpRes.power_levels.user and httpRes.power_levels.room and
-        httpRes.power_levels.room.state_default and
-	httpRes.power_levels.user >= httpRes.power_levels.room.state_default
+        httpRes.power_levels and httpRes.power_levels.user and
+        httpRes.power_levels.room and httpRes.power_levels.room.state_default and
+        httpRes.power_levels.user >= httpRes.power_levels.room.state_default
     then
         session.matrix_affiliation = "owner"
         session.auth_matrix_user_verification_is_owner = true

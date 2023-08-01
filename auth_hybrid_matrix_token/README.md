@@ -37,10 +37,6 @@ and handles it depending on its type.
     -- (optional) UVS auth token, if authentication enabled on UVS.
     -- Uncomment and set the right token if necessary.
     --uvs_auth_token = "changeme"
-
-    -- (optional) Make Matrix room moderators owners of the Jitsi room.
-    -- And additional module is needed in `MUC` to activate this feature.
-    --uvs_sync_power_levels = true
     }
   ```
 
