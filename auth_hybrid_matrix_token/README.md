@@ -65,6 +65,10 @@ token and handles it depending on its type.
   systemctl restart prosody.service
   ```
 
+## Similar projects
+
+- [Prosody Auth Matrix User Verification](https://github.com/matrix-org/prosody-mod-auth-matrix-user-verification)
+
 ## Sponsors
 
 [![Nordeck](/images/nordeck.png)](https://nordeck.net/)
