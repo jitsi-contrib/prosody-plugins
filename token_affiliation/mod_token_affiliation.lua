@@ -39,13 +39,15 @@ module:hook("muc-occupant-joined", function (event)
         end
     end
 
-    local i = 0.0
-    while (i < 2.8) do
-        timer.add_task(i, function()
-            room:set_affiliation(true, occupant.bare_jid, affiliation)
-        end)
-        i = i + 0.4
+    local i = 0
+    local function setAffiliation()
+        room:set_affiliation(true, occupant.bare_jid, affiliation)
+        if i > 8 then return end
+
+        i = i + 1
+        timer.add_task(0.2 * i, setAffiliation)
     end
+    setAffiliation()
 
     module:log(LOGLEVEL, "affiliation: %s", affiliation)
 end)
