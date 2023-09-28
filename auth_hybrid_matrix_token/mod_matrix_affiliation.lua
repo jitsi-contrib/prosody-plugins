@@ -62,13 +62,16 @@ module:hook("muc-occupant-joined", function (event)
     -- users who are not a Matrix owner (even they have a valid token).
     -- A timer is used because Jicofo will update the affiliation after this
     -- internal authentication phase is completed. It should be overwritten.
-    local i = 0.0
-    while (i < 2.0) do
-        timer.add_task(i, function()
-            room:set_affiliation(true, occupant.bare_jid, "member")
-        end)
-        i = i + 0.2
+    local i = 0
+    local function setAffiliation()
+        room:set_affiliation(true, occupant.bare_jid, "member")
+        if i > 8 then return end
+
+        i = i + 1
+        timer.add_task(0.2 * i, setAffiliation)
     end
+    setAffiliation()
+
     module:log( "info",
 	"affiliation is downgraded, occupant: %s",
 	occupant.bare_jid
