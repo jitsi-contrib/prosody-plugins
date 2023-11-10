@@ -22,31 +22,32 @@ module:hook("muc-occupant-joined", function (event)
     end
 
     local context_room = event.origin.jitsi_meet_context_room;
+    if not context_room then
+        return;
+    end
 
-    if context_room then
-        local lobby_enabled = (room._data.lobbyroom ~= nil);
+    local lobby_enabled = (room._data.lobbyroom ~= nil);
 
-        -- create lobby if requested
-        if context_room["lobby"] == true and not lobby_enabled then
-            prosody.events.fire_event("create-persistent-lobby-room", {
-                room = room,
-                skip_display_name_check = true,
-            });
-        end
+    -- create lobby if requested
+    if context_room["lobby"] == true and not lobby_enabled then
+        prosody.events.fire_event("create-persistent-lobby-room", {
+            room = room,
+            skip_display_name_check = true,
+        });
+    end
 
-        -- destroy lobby if requested
-        if context_room["lobby"] == false and lobby_enabled then
-            room:set_members_only(false);
-            prosody.events.fire_event('destroy-lobby-room', {
-                room = room,
-                newjid = room.jid,
-            });
-        end
+    -- destroy lobby if requested
+    if context_room["lobby"] == false and lobby_enabled then
+        room:set_members_only(false);
+        prosody.events.fire_event('destroy-lobby-room', {
+            room = room,
+            newjid = room.jid,
+        });
+    end
 
-        -- update password if set
-        if type(context_room["password"]) == "string" then
-            room:set_password(context_room["password"]);
-        end
+    -- update password if set
+    if type(context_room["password"]) == "string" then
+        room:set_password(context_room["password"]);
     end
 end);
 
@@ -65,9 +66,12 @@ module:hook("muc-occupant-pre-join", function (event)
     end
 
     local context_user = event.origin.jitsi_meet_context_user;
+    if not context_user then
+        return;
+    end
 
     -- bypass security if allowed
-    if context_user and context_user["security_bypass"] == true then
+    if context_user["security_bypass"] == true then
         module:log(LOGLEVEL, "Bypassing security for room %s occupant %s",
             room.jid, occupant.bare_jid);
 
