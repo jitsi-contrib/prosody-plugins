@@ -55,7 +55,7 @@ meeting room.
 
 ## A token sample
 
-A sample token body to activate lobby and set a passwrd for a room:
+A sample token body to activate lobby and set a password for a room:
 
 ```json
 {
@@ -63,8 +63,7 @@ A sample token body to activate lobby and set a passwrd for a room:
   "context": {
     "user": {
       "name": "myname",
-      "email": "myname@mydomain.com",
-      "lobby": true
+      "email": "myname@mydomain.com"
     },
     "room": {
       "lobby": true,
