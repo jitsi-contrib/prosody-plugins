@@ -5,7 +5,6 @@
 
 local LOGLEVEL = "debug";
 
-local muc_util = module:require "muc/util";
 local is_healthcheck_room = module:require "util".is_healthcheck_room;
 
 
