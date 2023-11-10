@@ -128,3 +128,7 @@ To allow a participant to bypass security checks:
     }
   }
 ```
+
+## Sponsors
+
+[![Nordeck](/images/nordeck.png)](https://nordeck.net/)
