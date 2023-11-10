@@ -1,7 +1,8 @@
 # Security On-Demand
 
 This plugin dynamically enables/disables lobby or set/unset password for the
-meeting room.
+meeting room. The participant can update these values if they have permission to
+join the meeting room.
 
 ## Installation
 
@@ -53,7 +54,7 @@ meeting room.
   systemctl restart prosody.service
   ```
 
-## A token sample
+## Token samples
 
 A sample token body to activate lobby and set a password for a room:
 
@@ -76,4 +77,54 @@ A sample token body to activate lobby and set a password for a room:
   "iat": 1601366000,
   "exp": 1601366180
 }
+```
+
+To enable lobby:
+
+```json
+  "context": {
+    "room": {
+      "lobby": true
+    }
+  }
+```
+
+To disable lobby:
+
+```json
+  "context": {
+    "room": {
+      "lobby": false
+    }
+  }
+```
+
+To set a password:
+
+```json
+  "context": {
+    "room": {
+      "password": "mypassword"
+    }
+  }
+```
+
+To unset password:
+
+```json
+  "context": {
+    "room": {
+      "password": ""
+    }
+  }
+```
+
+To allow a participant to bypass security checks:
+
+```json
+  "context": {
+    "user": {
+      "security_bypass": true
+    }
+  }
 ```
