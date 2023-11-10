@@ -61,3 +61,8 @@
 
   Prevents the unauthorized users to create a room and terminates the conference
   when the owner leaves.
+
+- [token security_ondemand](token_security_ondemand/)
+
+  Selectively enable/disable lobby or set/unset password for a meeting room
+  based on token content.
