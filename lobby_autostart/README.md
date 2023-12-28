@@ -15,13 +15,6 @@ the lobby with nobody to admit them.
 
   - Make sure you have a way for moderators to bypass the lobby. Test that it works when lobby is
     activated manually by another moderator.
-  
-  - Check that you have `/usr/share/jitsi-meet/prosody-plugins/mod_persistent_lobby.lua`. If it's not there, that means
-    your version of Jitsi does not yet include [this PR](https://github.com/jitsi/jitsi-meet/pull/12215) which is required.
-    - If upgrading Jitsi is not an option for you, you can still use the
-      [older version of mod_lobby_autostart](../lobby_autostart/README_legacy.md)
-      which does not require mod_persistent_lobby.
-  
 
 - Copy this script to the Prosody plugins folder. It's the following folder on
   Debian 
