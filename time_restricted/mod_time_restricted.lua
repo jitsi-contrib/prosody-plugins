@@ -34,14 +34,8 @@ module:hook("muc-room-created", function (event)
             return
         end
 
-        -- kick all participants
-        for _, p in room:each_occupant() do
-            if not _is_admin(p.jid) then
-                room:set_affiliation(true, p.jid, "outcast")
-                module:log(LOGLEVEL, "kick the occupant, %s", p.jid)
-            end
-        end
-
+        -- terminate the meeting
+        room:destroy(nil, "The meeting has been terminated")
         module:log(LOGLEVEL, "the conference terminated")
     end)
 end)
