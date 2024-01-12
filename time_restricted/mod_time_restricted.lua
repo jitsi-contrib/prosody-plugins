@@ -2,15 +2,10 @@ local LOGLEVEL = "debug"
 local MIN = module:get_option_number("conference_max_minutes", 10)
 local TIMEOUT = MIN * 60
 
-local is_admin = require "core.usermanager".is_admin
 local is_healthcheck_room = module:require "util".is_healthcheck_room
 local st = require "util.stanza"
 local timer = require "util.timer"
 module:log(LOGLEVEL, "loaded")
-
-local function _is_admin(jid)
-    return is_admin(jid, module.host)
-end
 
 module:hook("muc-room-created", function (event)
     local room = event.room
