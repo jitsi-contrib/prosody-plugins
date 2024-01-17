@@ -30,7 +30,7 @@ module:hook("muc-occupant-pre-join", function (event)
     end
 
     if not event.origin.matrix_affiliation then
-        module:log(LOGLEVEL, "skip lobby_bypass, not a matrix user")
+        module:log(LOGLEVEL, "skip lobby_bypass, not a Matrix user")
         return
     end
 
