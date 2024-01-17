@@ -59,6 +59,25 @@ token and handles it depending on its type.
       }
   ```
 
+- Lobby bypass
+
+  Use `matrix_lobby_bypass` to disable Jitsi lobby check for Matrix's room
+  members:
+
+  ```bash
+  cd /usr/share/jitsi-meet/prosody-plugins/
+  wget -O mod_matrix_lobby_bypass.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/auth_hybrid_matrix_token/mod_matrix_lobby_bypass.lua
+  ```
+
+  _/etc/prosody/conf.d/meet.mydomain.com.cfg.lua_
+
+  ```lua
+  Component "conference.meet.mydomain.com" "muc"
+      modules_enabled = {
+          "matrix_lobby_bypass";
+      }
+  ```
+
 - Restart the services
 
   ```bash
