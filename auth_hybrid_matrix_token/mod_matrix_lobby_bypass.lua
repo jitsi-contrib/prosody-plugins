@@ -29,6 +29,11 @@ module:hook("muc-occupant-pre-join", function (event)
         return
     end
 
+    if not event.origin.matrix_affiliation then
+        module:log(LOGLEVEL, "skip lobby_bypass, not a matrix user")
+        return
+    end
+
     local roomName, _ = jid_split(room.jid)
     local roomId = basexx.from_base32(roomName)
     if not roomId then
