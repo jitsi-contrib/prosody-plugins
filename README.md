@@ -26,6 +26,10 @@
 
   Automatically enables the lobby for all rooms.
 
+- [owner restricted](owner_restricted/)
+
+  Allows the conference if there is a moderator (`owner`) in the room.
+
 - [per room max occupants](per_room_max_occupants/)
 
   Extends the capabilities of mod_muc_max_occupants by allowing different max
