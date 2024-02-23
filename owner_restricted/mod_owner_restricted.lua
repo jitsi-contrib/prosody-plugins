@@ -33,7 +33,7 @@ local function terminator(room)
                 module:log(
                     LOGLEVEL,
                     "there is an owner, terminator is stopped, %s",
-    	        room.jid
+                    room.jid
                 )
                 return
             end
@@ -56,7 +56,7 @@ local function trigger_terminator(room)
                 module:log(
                     LOGLEVEL,
                     "there is an owner, terminator is not triggered, %s",
-		    room.jid
+                    room.jid
                 )
                 return
             end
