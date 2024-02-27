@@ -31,3 +31,7 @@ This plugin allows the conference if there is a moderator (`owner`) in the room.
   systemctl restart prosody.service
   systemctl restart jicofo.service
   ```
+
+## Sponsors
+
+[![Nordeck](/images/nordeck.png)](https://nordeck.net/)
