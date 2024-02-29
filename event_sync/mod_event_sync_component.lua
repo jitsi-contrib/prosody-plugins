@@ -372,6 +372,7 @@ function run_when_muc_module_loaded(component_host_module, component_host_name, 
     end
 end
 
+local main_muc_service; -- luacheck: ignore
 
 -- No easy way to infer main room from breakout room object, so search all rooms in main muc component and cache
 -- it on room so we don't have to search again
@@ -406,7 +407,6 @@ function handle_main_room_created(event)
     room:save();
 end
 
-local main_muc_service; -- luacheck: ignore
 
 -- Predefine breakout room attributes to be included in API payload for all events
 -- This should be scheduled AFTER speakerStats module, but BEFORE handler that compiles and sends API payload
