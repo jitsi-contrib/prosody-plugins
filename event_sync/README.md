@@ -165,7 +165,7 @@ be destroyed when the main room and all associated breakout rooms are empty.
   _/etc/prosody/conf.d/meet.mydomain.com.cfg.lua_
   
   ```lua
-  Component "event_sync.meet.mydomain.com" "event_sync_component"
+  Component "esync.meet.mydomain.com" "event_sync_component"
       muc_component = "conference.meet.mydomain.com"
       api_prefix = "http://your.api.server/api"
   ```
@@ -181,12 +181,12 @@ be destroyed when the main room and all associated breakout rooms are empty.
 Here's an example of the prosody config with optional configs values set:
 
 ```lua
-Component "event_sync.meet.mydomain.com" "event_sync_component"
+Component "esync.meet.mydomain.com" "event_sync_component"
     muc_component = "conference.meet.mydomain.com"
     breakout_component = "breakout.meet.mydomain.com"
 
     api_prefix = "http://your.api.server/api"
-    
+
     --- The following are all optional
     api_headers = {
         ["Authorization"] = "Bearer TOKEN-237958623045";
@@ -194,12 +194,12 @@ Component "event_sync.meet.mydomain.com" "event_sync_component"
     api_timeout = 10  -- timeout if API does not respond within 10s
     api_retry_count = 5  -- retry up to 5 times
     api_retry_delay = 1  -- wait 1s between retries
-    
+
     -- change retry rules so we also retry if endpoint returns HTTP 408
     api_should_retry_for_code = function (code)
         return code >= 500 or code == 408
     end
-    
+
     -- Optionally include total_dominant_speaker_time (milliseconds) in payload for occupant-left and room-destroyed
     include_speaker_stats = true
 ```

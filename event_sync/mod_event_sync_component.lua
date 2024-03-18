@@ -2,9 +2,9 @@
 --
 --  Example config:
 --
---    Component "event_sync.mydomain.com" "event_sync_component"
---        muc_component = "conference.mydomain.com"
---        breakout_component = "breakout.mydomain.com"
+--    Component "esync.meet.mydomain.com" "event_sync_component"
+--        muc_component = "conference.meet.mydomain.com"
+--        breakout_component = "breakout.meet.mydomain.com"
 --
 --        api_prefix = "http://external_app.mydomain.com/api"
 --
