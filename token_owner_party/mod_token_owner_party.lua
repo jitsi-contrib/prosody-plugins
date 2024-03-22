@@ -56,17 +56,13 @@ module:hook("muc-occupant-left", function (event)
         return
     end
 
-    -- the owner is gone, start to check the room condition
-    room:broadcast_message(
-        st.message({ type="groupchat", from=occupant.nick })
-        :tag("body"):text("The owner is gone"))
     module:log(LOGLEVEL, "an owner leaved, %s", occupant.jid)
 
     -- check if there is any other owner here
     for _, o in room:each_occupant() do
         if not _is_admin(o.jid) then
             if room:get_affiliation(o.jid) == "owner" then
-                module:log(LOGLEVEL, "an owner is here, %s", o.jid)
+                module:log(LOGLEVEL, "an owner is still here, %s", o.jid)
                 return
             end
         end
@@ -78,8 +74,13 @@ module:hook("muc-occupant-left", function (event)
             return
         end
 
+        local occupant_count = it.count(room:each_occupant())
+        if occupant_count == 0 then
+            return
+        end
+
         -- last check before destroying the room
-        -- if the owner is returned, cancel
+        -- if an owner is still here, cancel
         for _, o in room:each_occupant() do
             if not _is_admin(o.jid) then
                 if room:get_affiliation(o.jid) == "owner" then
@@ -89,17 +90,9 @@ module:hook("muc-occupant-left", function (event)
             end
         end
 
-        -- don't destroy room, this will cause an issue
-        -- kick all participants
-        for _, p in room:each_occupant() do
-            if not _is_admin(p.jid) then
-                if room:get_affiliation(p.jid) ~= "owner" then
-                    room:set_affiliation(true, p.jid, "outcast")
-                    module:log(LOGLEVEL, "kick the occupant, %s", p.jid)
-                end
-            end
-        end
-
+        -- terminate the meeting
+        room:set_persistent(false)
+        room:destroy(nil, "The meeting has been terminated")
         module:log(LOGLEVEL, "the party finished")
     end)
 end)
