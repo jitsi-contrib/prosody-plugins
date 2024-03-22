@@ -29,7 +29,7 @@ module:hook("muc-occupant-pre-join", function (event)
            context_user["affiliation"] == "teacher" or
            context_user["moderator"] == "true" or
            context_user["moderator"] == true then
-            module:log(LOGLEVEL, "let the party begin")
+            module:log(LOGLEVEL, "an owner joined the party")
             return
         end
     end
@@ -37,7 +37,7 @@ module:hook("muc-occupant-pre-join", function (event)
     -- if the party has not started yet, don't accept the participant
     local occupant_count = it.count(room:each_occupant())
     if occupant_count < 2 then
-        module:log(LOGLEVEL, "the party has not started yet")
+        module:log(LOGLEVEL, "the party is not started yet")
         event.origin.send(st.error_reply(stanza, 'cancel', 'not-allowed'))
         return true
     end
@@ -52,11 +52,11 @@ module:hook("muc-occupant-left", function (event)
 
     -- no need to do anything for normal participant
     if room:get_affiliation(occupant.jid) ~= "owner" then
-        module:log(LOGLEVEL, "a participant leaved, %s", occupant.jid)
+        module:log(LOGLEVEL, "a participant left, %s", occupant.jid)
         return
     end
 
-    module:log(LOGLEVEL, "an owner leaved, %s", occupant.jid)
+    module:log(LOGLEVEL, "an owner left, %s", occupant.jid)
 
     -- check if there is any other owner here
     for _, o in room:each_occupant() do
@@ -84,7 +84,11 @@ module:hook("muc-occupant-left", function (event)
         for _, o in room:each_occupant() do
             if not _is_admin(o.jid) then
                 if room:get_affiliation(o.jid) == "owner" then
-                    module:log(LOGLEVEL, "timer, an owner is here, %s", o.jid)
+                    module:log(
+                        LOGLEVEL,
+                        "timer: an owner is still here, %s",
+                        o.jid
+                    )
                     return
                 end
             end
@@ -93,6 +97,6 @@ module:hook("muc-occupant-left", function (event)
         -- terminate the meeting
         room:set_persistent(false)
         room:destroy(nil, "The meeting has been terminated")
-        module:log(LOGLEVEL, "the party finished")
+        module:log(LOGLEVEL, "the party is over")
     end)
 end)
