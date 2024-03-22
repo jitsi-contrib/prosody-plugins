@@ -3,6 +3,7 @@ local MIN = module:get_option_number("conference_max_minutes", 10)
 local TIMEOUT = MIN * 60
 
 local is_healthcheck_room = module:require "util".is_healthcheck_room
+local it = require "util.iterators"
 local st = require "util.stanza"
 local timer = require "util.timer"
 module:log(LOGLEVEL, "loaded")
