@@ -33,7 +33,7 @@ local function terminator(room)
     -- stop this terminator if there is no one in the room
     -- this happens if the room was already destroyed by another mechanism
     local occupant_count = it.count(room:each_occupant())
-    if not (occupant_count > 0) then
+    if occupant_count == 0 then
         module:log(
             LOGLEVEL,
             "Noone in the room, terminator is stopped, %s, %s",
