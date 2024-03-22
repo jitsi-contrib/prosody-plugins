@@ -22,6 +22,23 @@ local function terminator(room)
     -- stop this terminator if there is another active one
     -- always the last terminator destroys the room
     if room._data.terminator_count > 0 then
+        module:log(
+            LOGLEVEL,
+            "there is another active terminator. this one is stopped, %s, %s",
+            room.jid, room._data.meetingId
+        )
+        return
+    end
+
+    -- stop this terminator if there is no one in the room
+    -- this happens if the room was already destroyed by another mechanism
+    local occupant_count = it.count(room:each_occupant())
+    if not (occupant_count > 0) then
+        module:log(
+            LOGLEVEL,
+            "Noone in the room, terminator is stopped, %s, %s",
+            room.jid, room._data.meetingId
+        )
         return
     end
 
@@ -41,6 +58,7 @@ local function terminator(room)
     end
 
     -- terminate the meeting
+    room:set_persistent(false)
     room:destroy(nil, "The meeting has been terminated")
     module:log(LOGLEVEL, "the meeting has been terminated")
 end
