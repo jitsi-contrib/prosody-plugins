@@ -1,6 +1,6 @@
 # Lobby Deactivate
 
-This plugin deactivates the lobby after the first join.
+This plugin deactivates the lobby after the first authorized user joins.
 
 It is expected to be used with [lobby_autostart](../lobby_autostart). It keeps
 the lobby active for unauthorized users but deactivates it when an authorized
