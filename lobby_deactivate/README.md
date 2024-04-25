@@ -13,7 +13,7 @@ user joins the meeting.
 
   ```bash
   cd /usr/share/jitsi-meet/prosody-plugins/
-  wget -O mod_lobby_deactivate.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/mod_lobby_deactivate/mod_lobby_deactivate.lua
+  wget -O mod_lobby_deactivate.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/lobby_deactivate/mod_lobby_deactivate.lua
   ```
 
 - Enable module in your prosody config.
