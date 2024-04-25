@@ -26,6 +26,10 @@
 
   Automatically enables the lobby for all rooms.
 
+- [lobby deactivate](lobby_deactivate/)
+
+  Deactivate the lobby after the first authorized participant joins.
+
 - [owner restricted](owner_restricted/)
 
   Allows the conference if there is a moderator (`owner`) in the room.
