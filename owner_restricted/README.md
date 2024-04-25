@@ -6,7 +6,7 @@ It doesn't prevent guests to join the room but ends the meeting if there is
 still no moderator after `timeout`.
 
 When the last moderator leaves the room, it waits `timeout` seconds and ends the
-meetinf if the moderator doesn't come back.
+meeting if the moderator doesn't come back.
 
 ## Installation
 
