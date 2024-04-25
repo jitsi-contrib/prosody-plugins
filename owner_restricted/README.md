@@ -2,6 +2,12 @@
 
 This plugin allows the conference if there is a moderator (`owner`) in the room.
 
+It doesn't prevent guests to join the room but ends the meeting if there is
+still no moderator after `timeout`.
+
+When the last moderator leaves the room, it waits `timeout` seconds and ends the
+meetinf if the moderator doesn't come back.
+
 ## Installation
 
 - Copy this script to the Prosody plugins folder. It's the following folder on
@@ -23,6 +29,8 @@ This plugin allows the conference if there is a moderator (`owner`) in the room.
       ...
       "owner_restricted";
     }
+
+    role_timeout = 60;
   ```
 
 - Restart the services
