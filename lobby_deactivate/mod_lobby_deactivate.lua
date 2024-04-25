@@ -17,7 +17,7 @@ module:hook("muc-occupant-joined", function (event)
         return
     end
 
-    -- do run for focus
+    -- dont run for focus
     local occupant_count = it.count(room:each_occupant())
     if occupant_count < 2 then
         return
