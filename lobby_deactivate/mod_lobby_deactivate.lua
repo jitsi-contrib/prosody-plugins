@@ -9,7 +9,7 @@ local is_healthcheck_room = module:require "util".is_healthcheck_room;
 
 module:log("info", "loaded");
 
-module:hook("muc-occupant-join", function (event)
+module:hook("muc-occupant-joined", function (event)
     local room, origin = event.room, event.origin;
 
     if is_healthcheck_room(room.jid) then
