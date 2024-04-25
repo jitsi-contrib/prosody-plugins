@@ -28,7 +28,7 @@
 
 - [lobby deactivate](lobby_deactivate/)
 
-  Deactivate the lobby after the first authorized participant joins.
+  Deactivates the lobby after the first authorized participant joins.
 
 - [owner restricted](owner_restricted/)
 
