@@ -11,7 +11,7 @@ The module should **not** be enabled together with `external_services`. If both 
 
   ```bash
   cd /usr/share/jitsi-meet/prosody-plugins/
-  wget -O mod_proxybased_external_services.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/access_token/mod_proxybased_external_services.lua
+  wget -O mod_proxybased_external_services.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/proxybased_external_services/mod_proxybased_external_services.lua
   ```
 
 - Enable module in your prosody config.
