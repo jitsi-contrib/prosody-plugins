@@ -39,6 +39,9 @@
   Extends the capabilities of mod_muc_max_occupants by allowing different max
   occupancy based on the room name or subdomain.
 
+- [proxybased external services](proxybased_external_services)
+  Extends the functionality of `mod_external_services` to allow dynamically setting the host of services based on an HTTP header.
+
 - [secure domain lobby bypass](secure_domain_lobby_bypass/)
 
   Enables some users to bypass lobby based on the authentiation.
