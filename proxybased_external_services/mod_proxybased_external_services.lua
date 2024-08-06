@@ -14,7 +14,10 @@ local default_ttl = module:get_option_number("proxybased_external_service_ttl", 
 local configured_services = module:get_option_array("proxybased_external_services", {});
 
 local access = module:get_option_set("proxybased_external_service_access", {});
-local host_header = module:get_option_string("proxybased_external_service_host_header", "Turn-Server"):gsub("%-", "_"):lower()
+local host_header = module:get_option_string(
+	"proxybased_external_service_host_header",
+	"Turn-Server"
+):gsub("%-", "_"):lower()
 
 -- https://tools.ietf.org/html/draft-uberti-behave-turn-rest-00
 local function behave_turn_rest_credentials(srv, item, secret)
@@ -159,8 +162,7 @@ function get_headers_bosh(event)
 end
 
 function get_host_from_http_headers(event)
-	local headers = nil
-
+	local headers
 	if event.origin.websocket_request ~= nil then
 		module:log("debug", "Detected websocket request");
 		headers = get_headers_ws(event);
