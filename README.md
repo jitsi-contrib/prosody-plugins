@@ -41,7 +41,8 @@
 
 - [proxybased external services](proxybased_external_services/)
 
-  extends `external_services` module to allow redirection of different clients to different services based on an HTTP header in the requests.
+  extends `external_services` module to allow redirection of different clients
+  to different services based on an HTTP header in the requests.
 
 - [secure domain lobby bypass](secure_domain_lobby_bypass/)
 
