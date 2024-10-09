@@ -6,6 +6,9 @@ It is expected to be used with [lobby_autostart](../lobby_autostart). It keeps
 the lobby active for unauthorized users but deactivates it when an authorized
 user joins the meeting.
 
+**Recommendation**: Set `config.lobby.autoKnock` in `config.js` for a better
+user experience.
+
 ## Installation
 
 - Copy this script to the Prosody plugins folder. It's the following folder on
