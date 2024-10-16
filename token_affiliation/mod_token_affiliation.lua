@@ -1,5 +1,12 @@
 local LOGLEVEL = "debug"
 
+-- Set this parameter in Prosody config if you dont want cascading updates for
+-- affiliation. Cascading updates are needed when the authentication is enabled
+-- in Jicofo.
+local DISABLE_CASCADING_SET = module:get_option_boolean(
+    "disable_cascading_set", false
+)
+
 local is_admin = require "core.usermanager".is_admin
 local is_healthcheck_room = module:require "util".is_healthcheck_room
 local timer = require "util.timer"
@@ -42,6 +49,8 @@ module:hook("muc-occupant-joined", function (event)
     local i = 0
     local function setAffiliation()
         room:set_affiliation(true, occupant.bare_jid, affiliation)
+
+        if DISABLE_CASCADING_SET then return end
         if i > 8 then return end
 
         i = i + 1
