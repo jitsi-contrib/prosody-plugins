@@ -22,6 +22,13 @@ local jid_split = require "util.jid".split
 local timer = require "util.timer"
 local LOGLEVEL = "debug"
 
+-- Set this parameter in Prosody config if you dont want cascading updates for
+-- affiliation. Cascading updates are needed when the authentication is enabled
+-- in Jicofo.
+local DISABLE_CASCADING_SET = module:get_option_boolean(
+    "disable_cascading_set", false
+)
+
 local function _is_admin(jid)
     return is_admin(jid, module.host)
 end
@@ -65,6 +72,8 @@ module:hook("muc-occupant-joined", function (event)
     local i = 0
     local function setAffiliation()
         room:set_affiliation(true, occupant.bare_jid, "member")
+
+        if DISABLE_CASCADING_SET then return end
         if i > 8 then return end
 
         i = i + 1
