@@ -6,8 +6,8 @@
 -- room name to understand if this room is created by widget or not...
 --
 -- There are two possible formats for Jitsi room names created by widget:
--- - jitsi_room_name should match "jitsi[a-z]{24}" (regex) or
--- - base32.decode(jitsi_room_name) should match "!.*:.*[.].*" (regex)
+-- - jitsi_room_name should match "^jitsi[a-z]{24}$" (regex) or
+-- - base32.decode(jitsi_room_name) should match "^!.*:.*[.].*" (regex)
 --
 -- If the participant is already a valid member of Matrix's room then no need to
 -- check her again in Jitsi lobby.
@@ -38,7 +38,7 @@ module:hook("muc-occupant-pre-join", function (event)
     local roomName, _ = jid_split(room.jid)
     local isMatrixRoomName = string.match(
         roomName,
-        "jitsi%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l"
+        "^jitsi%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l$"
     )
 
     -- if it doesnt match the first format, check the second possible format
@@ -49,7 +49,7 @@ module:hook("muc-occupant-pre-join", function (event)
             return
         end
 
-        local isMatrixRoomId = string.match(roomId, "!.*:.*[.].*")
+        local isMatrixRoomId = string.match(roomId, "^!.*:.*[.].*")
         if not isMatrixRoomId then
             module:log(LOGLEVEL, "skip lobby_bypass, not a Matrix room")
             return
