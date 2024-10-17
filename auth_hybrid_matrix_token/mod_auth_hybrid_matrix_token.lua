@@ -58,13 +58,29 @@ local host = module.host
 function init_session(event)
     local session, request = event.session, event.request
     local query = request.url.query
+    local token
 
+    -- extract token from Authorization header
+    if request.headers["authorization"] then
+        -- assumes the header value starts with "Bearer "
+        token = request.headers["authorization"]:sub(
+            8,
+            #request.headers["authorization"]
+        )
+    end
+
+    -- allow override of token via query parameter
     if query ~= nil then
         local params = formdecode(query)
 
-        session.auth_token = params and params.token or nil
-        session.jitsi_room = params and params.room or nil
+	if params and params.token then
+            token = params.token
+            session.jitsi_room = params.room or nil
+        end
     end
+
+    -- in either case set auth_token in the session
+    session.auth_token = token
 end
 
 module:hook_global("bosh-session", init_session)
@@ -220,7 +236,7 @@ local function matrix_handler(session, payload)
         return false, "bad-request", "Matrix room ID must be given"
     end
 
-    local decodedRoomId = basexx.from_base32(session.jitsi_room)
+    local decodedRoomId = basexx.from_base32(session.jitsi_room or "")
     if decodedRoomId ~= payload.context.matrix.room_id then
         module:log("warn", "Jitsi and Matrix rooms don't match")
         session.auth_token = nil
