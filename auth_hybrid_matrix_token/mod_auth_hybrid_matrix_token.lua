@@ -43,6 +43,12 @@ if uvsAuthToken == nil then
     )
 end
 
+local measure_pre_fetch_fail = module:measure('pre_fetch_fail', 'counter')
+local measure_verify_fail = module:measure('verify_fail', 'counter')
+local measure_success = module:measure('success', 'counter')
+local measure_ban = module:measure('ban', 'counter')
+local measure_post_auth_fail = module:measure('post_auth_fail', 'counter')
+
 -- define auth provider
 local provider = {}
 
@@ -188,6 +194,7 @@ local function matrix_handler(session, payload)
     if uvsUrl == nil then
         module:log("warn", "Missing 'uvs_base_url' config")
         session.auth_token = nil
+        measure_pre_fetch_fail(1)
         return false, "access-denied", "missing Matrix UVS address"
     end
 
@@ -202,12 +209,14 @@ local function matrix_handler(session, payload)
             "Error verifying token err:%s, reason:%s", error, reason
         )
         session.auth_token = nil
+        measure_verify_fail(1)
         return res, error, reason
     end
 
     if payload.context.matrix.room_id == nil then
         module:log("warn", "Missing Matrix room_id in token")
         session.auth_token = nil
+        measure_verify_fail(1)
         return false, "bad-request", "Matrix room ID must be given"
     end
 
@@ -215,13 +224,15 @@ local function matrix_handler(session, payload)
     if decodedRoomId ~= payload.context.matrix.room_id then
         module:log("warn", "Jitsi and Matrix rooms don't match")
         session.auth_token = nil
-        return false, "access-denied", "Jitsi room does not match Matrix room"
+        measure_ban(1)
+        return false, "not-allowed", "Jitsi room does not match Matrix room"
     end
 
     if not is_user_in_room(session, payload.context.matrix) then
         module:log("warn", "Matrix token is invalid or user does not in room")
         session.auth_token = nil
-        return false, "access-denied", "Matrix token invalid or not in room"
+        measure_ban(1)
+        return false, "not-allowed", "Matrix token invalid or not in room"
     end
 
     session.jitsi_meet_context_matrix = payload.context.matrix
@@ -243,6 +254,7 @@ local function token_handler(session)
                 preEvent.reason
         )
         session.auth_token = nil
+        measure_pre_fetch_fail(1)
         return preEvent.res, preEvent.error, preEvent.reason
     end
 
@@ -253,6 +265,7 @@ local function token_handler(session)
             "Error verifying token err:%s, reason:%s", error, reason
         )
         session.auth_token = nil
+        measure_verify_fail(1)
         return res, error, reason
     end
 
@@ -266,6 +279,7 @@ local function common_handler(self, session, message)
     )
     if shouldAllow == false then
         module:log("warn", "user is banned")
+        measure_ban(1)
         return false, "not-allowed", "user is banned"
     end
 
@@ -274,9 +288,9 @@ local function common_handler(self, session, message)
         session
     )
 
-    if (customUsername) then
+    if customUsername then
         self.username = customUsername
-    elseif (session.previd ~= nil) then
+    elseif session.previd ~= nil then
         for _, s in pairs(sessions) do
             if (s.resumption_token == session.previd) then
                 self.username = s.username
@@ -299,9 +313,11 @@ local function common_handler(self, session, message)
             postEvent.reason
         )
         session.auth_token = nil
+        measure_post_auth_fail(1)
         return postEvent.res, postEvent.error, postEvent.reason
     end
 
+    measure_success(1)
     return true, nil, nil
 end
 
