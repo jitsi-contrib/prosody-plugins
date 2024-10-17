@@ -6,8 +6,8 @@
 -- if this room is created by widget or not...
 --
 -- There are two possible formats for Jitsi room names created by widget:
--- - jitsi_room_name should match "jitsi[a-z]{24}" (regex) or
--- - base32.decode(jitsi_room_name) should match "!.*:.*[.].*" (regex)
+-- - jitsi_room_name should match "^jitsi[a-z]{24}$" (regex) or
+-- - base32.decode(jitsi_room_name) should match "^!.*:.*[.].*" (regex)
 --
 -- This module assumes that the authentication is already enabled on Jicofo. So
 -- every participants who have a valid token will become moderator (owner) by
@@ -50,7 +50,7 @@ module:hook("muc-occupant-joined", function (event)
     local roomName, _ = jid_split(room.jid)
     local isMatrixRoomName = string.match(
         roomName,
-        "jitsi%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l"
+        "^jitsi%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l$"
     )
 
     -- if it doesnt match the first format, check the second possible format
@@ -61,7 +61,7 @@ module:hook("muc-occupant-joined", function (event)
             return
         end
 
-        local isMatrixRoomId = string.match(roomId, "!.*:.*[.].*")
+        local isMatrixRoomId = string.match(roomId, "^!.*:.*[.].*")
         if not isMatrixRoomId then
             module:log(LOGLEVEL, "skip affiliation, not a Matrix room")
             return
