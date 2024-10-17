@@ -222,7 +222,11 @@ local function matrix_handler(session, payload)
     if res == false then
         module:log(
             "warn",
-            "Error verifying token err:%s, reason:%s", error, reason
+            "Error verifying token err:%s, reason:%s tenant:%s room:%s",
+	    error,
+	    reason,
+	    session.jitsi_web_query_prefix,
+	    session.jitsi_web_query_room
         )
         session.auth_token = nil
         measure_verify_fail(1)
@@ -278,7 +282,11 @@ local function token_handler(session)
     if res == false then
         module:log(
             "warn",
-            "Error verifying token err:%s, reason:%s", error, reason
+            "Error verifying token err:%s, reason:%s tenant:%s room:%s",
+	    error,
+	    reason,
+	    session.jitsi_web_query_prefix,
+	    session.jitsi_web_query_room
         )
         session.auth_token = nil
         measure_verify_fail(1)
