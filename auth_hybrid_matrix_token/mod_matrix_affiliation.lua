@@ -5,8 +5,9 @@
 -- by Element's Jitsi widget. This module checks Jitsi room name to understand
 -- if this room is created by widget or not...
 --
--- base32.decode(jitsi_room_name) should match "!.*:.*[.].*" (regex) for related
--- rooms.
+-- There are two possible formats for Jitsi room names created by widget:
+-- - jitsi_room_name should match "jitsi[a-z]{24}" (regex) or
+-- - base32.decode(jitsi_room_name) should match "!.*:.*[.].*" (regex)
 --
 -- This module assumes that the authentication is already enabled on Jicofo. So
 -- every participants who have a valid token will become moderator (owner) by
@@ -47,16 +48,24 @@ module:hook("muc-occupant-joined", function (event)
     end
 
     local roomName, _ = jid_split(room.jid)
-    local roomId = basexx.from_base32(roomName)
-    if not roomId then
-        module:log(LOGLEVEL, "skip affiliation, cannot decode the room name")
-        return
-    end
+    local isMatrixRoomName = string.match(
+        roomName,
+        "jitsi%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l"
+    )
 
-    local isMatrixRoom = string.match(roomId, "!.*:.*[.].*")
-    if not isMatrixRoom then
-        module:log(LOGLEVEL, "skip affiliation, not a Matrix room")
-        return
+    -- if it doesnt match the first format, check the second possible format
+    if not isMatrixRoomName then
+        local roomId = basexx.from_base32(roomName)
+        if not roomId then
+            module:log(LOGLEVEL, "skip affiliation, cannot decode the name")
+            return
+        end
+
+        local isMatrixRoomId = string.match(roomId, "!.*:.*[.].*")
+        if not isMatrixRoomId then
+            module:log(LOGLEVEL, "skip affiliation, not a Matrix room")
+            return
+        end
     end
 
     if event.origin.matrix_affiliation == "owner" then
