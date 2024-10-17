@@ -73,9 +73,12 @@ function init_session(event)
     if query ~= nil then
         local params = formdecode(query)
 
-	if params and params.token then
-            token = params.token
-            session.jitsi_room = params.room or nil
+	if params then
+            session.jitsi_room = params.room
+
+            if params.token then
+                token = params.token
+            end
         end
     end
 
@@ -235,7 +238,9 @@ local function matrix_handler(session, payload)
         return res, error, reason
     end
 
-    if payload.context.matrix.room_id == nil then
+    if not payload.context.matrix.room_id
+        or payload.context.matrix.room_id == ""
+    then
         module:log("warn", "Missing Matrix room_id in token")
         session.auth_token = nil
         measure_verify_fail(1)

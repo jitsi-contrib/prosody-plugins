@@ -8,7 +8,7 @@
 -- base32.decode(jitsi_room_name) should match "!.*:.*[.].*" (regex) for related
 -- rooms.
 --
--- Since the participant is already a valid member of Matrix's room, no need to
+-- If the participant is already a valid member of Matrix's room then no need to
 -- check her again in Jitsi lobby.
 -- -----------------------------------------------------------------------------
 local basexx = require 'basexx'
