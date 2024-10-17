@@ -5,8 +5,9 @@
 -- meeting room is created by Element's Jitsi widget. This module checks Jitsi
 -- room name to understand if this room is created by widget or not...
 --
--- base32.decode(jitsi_room_name) should match "!.*:.*[.].*" (regex) for related
--- rooms.
+-- There are two possible formats for Jitsi room names created by widget:
+-- - jitsi_room_name should match "jitsi[a-z]{24}" (regex) or
+-- - base32.decode(jitsi_room_name) should match "!.*:.*[.].*" (regex)
 --
 -- If the participant is already a valid member of Matrix's room then no need to
 -- check her again in Jitsi lobby.
@@ -35,16 +36,24 @@ module:hook("muc-occupant-pre-join", function (event)
     end
 
     local roomName, _ = jid_split(room.jid)
-    local roomId = basexx.from_base32(roomName)
-    if not roomId then
-        module:log(LOGLEVEL, "skip lobby_bypass, cannot decode the room name")
-        return
-    end
+    local isMatrixRoomName = string.match(
+        roomName,
+        "jitsi%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l"
+    )
 
-    local isMatrixRoom = string.match(roomId, "!.*:.*[.].*")
-    if not isMatrixRoom then
-        module:log(LOGLEVEL, "skip lobby_bypass, not a Matrix room")
-        return
+    -- if it doesnt match the first format, check the second possible format
+    if not isMatrixRoomName then
+        local roomId = basexx.from_base32(roomName)
+        if not roomId then
+            module:log(LOGLEVEL, "skip lobby_bypass, cannot decode the name")
+            return
+        end
+
+        local isMatrixRoomId = string.match(roomId, "!.*:.*[.].*")
+        if not isMatrixRoomId then
+            module:log(LOGLEVEL, "skip lobby_bypass, not a Matrix room")
+            return
+        end
     end
 
     -- bypass room password if exists
