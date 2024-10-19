@@ -72,6 +72,7 @@ When an occupant joins, `POST ${api_prefix}/events/occupant/joined` is called wi
 * room_jid
 * is_breakout
 * breakout_room_id (only if is_breakout is true)
+* active_occupants_count (current number of active occupants, including the one that just joined)
 * occupant
     * occupant_jid
     * joined_at
@@ -87,6 +88,7 @@ Example:
   "room_name": "catchup",
   "room_jid": "catchup@conference.meet.mydomain.com",
   "is_breakout": false,
+  "active_occupants_count": 4,
   "occupant": {
     "name": "James Barrow",
     "email": "j.barrow@domain.com",
@@ -105,6 +107,7 @@ When an occupant leaves, `POST ${api_prefix}/events/occupant/left` is called wit
 * room_jid
 * is_breakout
 * breakout_room_id (only if is_breakout is true)
+* active_occupants_count (current number of active occupants, excluding the one that just left)
 * occupant
     * occupant_jid
     * joined_at
@@ -121,6 +124,7 @@ Example:
   "room_name": "catchup",
   "room_jid": "catchup@conference.meet.mydomain.com",
   "is_breakout": false,
+  "active_occupants_count": 3,
   "occupant": {
     "name": "James Barrow",
     "email": "j.barrow@domain.com",

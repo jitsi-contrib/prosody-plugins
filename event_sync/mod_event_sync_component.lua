@@ -187,6 +187,16 @@ function EventData:get_occupant_array()
     return output;
 end
 
+--- Returns number of active occupants
+function EventData:get_active_occupants_count()
+    local output = 0;
+    for _ in pairs(self.active) do
+        output = output + 1
+    end
+
+    return output;
+end
+
 --- End EventData implementation
 
 
@@ -291,6 +301,7 @@ function occupant_joined(event)
     local payload = {
             ['event_name'] = 'muc-occupant-joined';
             ['occupant'] = occupant_data;
+            ['active_occupants_count'] = room_data:get_active_occupants_count();
     };
     update_with_room_attributes(payload, room);
 
@@ -323,6 +334,7 @@ function occupant_left(event)
     local payload = {
             ['event_name'] = 'muc-occupant-left';
             ['occupant'] = occupant_data;
+            ['active_occupants_count'] = room_data:get_active_occupants_count();
     };
     update_with_room_attributes(payload, room);
 
