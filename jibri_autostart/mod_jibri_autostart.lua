@@ -23,7 +23,7 @@ local function _start_recording(room, session, occupant_jid)
     local occupant = room:get_occupant_by_real_jid(occupant_jid)
 
     -- check recording permission
-    if occupant.role ~= "moderator" then
+    if occupant == nil or occupant.role ~= "moderator" then
         return
     elseif
         session.jitsi_meet_context_features ~= nil and
