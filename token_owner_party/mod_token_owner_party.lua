@@ -7,6 +7,7 @@ local it = require "util.iterators"
 local st = require "util.stanza"
 
 local muc_domain_base = module:get_option_string("muc_mapper_domain_base");
+local main_muc_component_host = module:get_option_string("muc_component");
 local breakout_muc_component_host = module:get_option_string("breakout_component", "breakout." .. muc_domain_base);
 
 -- dict of room jid to timer object
@@ -19,6 +20,13 @@ module:log(LOGLEVEL, "loaded")
 local function _is_admin(jid)
     return is_admin(jid, module.host)
 end
+
+-- Handle events on main muc module
+run_when_component_loaded(main_muc_component_host, function(host_module, host_name)
+    run_when_muc_module_loaded(host_module, host_name, function (main_muc, main_module)
+        main_muc_service = main_muc;  -- so it can be accessed from breakout muc event handlers
+    end);
+end);
 
 -- Helper function to wait till a component is loaded before running the given callback
 local function run_when_component_loaded(component_host_name, callback)
