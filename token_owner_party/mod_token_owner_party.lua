@@ -21,13 +21,6 @@ local function _is_admin(jid)
     return is_admin(jid, module.host)
 end
 
--- Handle events on main muc module
-run_when_component_loaded(main_muc_component_host, function(host_module, host_name)
-    run_when_muc_module_loaded(host_module, host_name, function (main_muc, main_module)
-        main_muc_service = main_muc;  -- so it can be accessed from breakout muc event handlers
-    end);
-end);
-
 -- Helper function to wait till a component is loaded before running the given callback
 local function run_when_component_loaded(component_host_name, callback)
     local function trigger_callback()
@@ -236,6 +229,13 @@ module:hook("muc-occupant-left", function (event)
         destroy_room(room)
     end)
 end)
+
+-- Handle events on main muc module
+run_when_component_loaded(main_muc_component_host, function(host_module, host_name)
+    run_when_muc_module_loaded(host_module, host_name, function (main_muc, main_module)
+        main_muc_service = main_muc;  -- so it can be accessed from breakout muc event handlers
+    end);
+end);
 
 -- Handle events on breakout muc module
 run_when_component_loaded(breakout_muc_component_host, function(host_module, host_name)
