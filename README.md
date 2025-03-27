@@ -65,6 +65,10 @@
 
   Enables some users to bypass lobby based on token content.
 
+- [token lobby bypass_for_initiator](token_lobby_bypass_for_initiator/)
+
+  Enables the first moderator to bypass the lobby.
+
 - [token lobby ondemand](token_lobby_ondemand/)
 
   Selectively send users to lobby based on token content. Enables lobby
