@@ -65,7 +65,7 @@
 
   Enables some users to bypass lobby based on token content.
 
-- [token lobby bypass_for_initiator](token_lobby_bypass_for_initiator/)
+- [token lobby bypass for initiator](token_lobby_bypass_for_initiator/)
 
   Enables the first moderator to bypass the lobby.
 
