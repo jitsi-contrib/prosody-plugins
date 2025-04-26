@@ -2,15 +2,21 @@
 
 This plugin automatically manages lobby activation and moderator assignment:
 
-- **When a new owner (moderator) joins**, it automatically enables the lobby for the room if not already active.
-- **When the last owner leaves**, it automatically promotes one of the remaining participants (`member`) to `owner` to ensure someone can admit users from the lobby.
+- **When a new owner (moderator) joins**, it automatically enables the lobby for
+  the room if not already active.
+- **When the last owner leaves**, it automatically promotes one of the remaining
+  participants (`member`) to `owner` to ensure someone can admit users from the
+  lobby.
 
 ## Known Issues
 
-- When authorization is required to create a room (e.g., JWT authentication is enabled), participants who were waiting before the moderator joined may enter the room directly without passing through the lobby.
-  This happens because the lobby is activated shortly *after* the moderator joins.
+- When authorization is required to create a room (e.g., JWT authentication is
+  enabled), participants who were waiting before the moderator joined may enter
+  the room directly without passing through the lobby. This happens because the
+  lobby is activated shortly _after_ the moderator joins.
 
 ## Installation
+
 - **Installing the plugin:**
 
   ```bash
@@ -37,6 +43,7 @@ This plugin automatically manages lobby activation and moderator assignment:
   ```
 
 ## Installation in Docker
+
 - **Installing the plugin:**
   ```bash
   cd ${CONFIG}/prosody/prosody-plugins/custom
