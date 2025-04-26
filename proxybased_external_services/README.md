@@ -1,11 +1,16 @@
 # proxybased_external_services
-This module is dervied from jitsi's original `external_services` module and allows you to set the host of the services via an http header. \
-This is useful when you want to redirect different clients to different services. \
+
+This module is dervied from jitsi's original `external_services` module and
+allows you to set the host of the services via an http header.\
+This is useful when you want to redirect different clients to different
+services.\
 The module currently supports WebSocket and Bosh connections.
 
-The module should **not** be enabled together with `external_services`. If both modules are enabled at the same time, unexpected behaviour may occur.
+The module should **not** be enabled together with `external_services`. If both
+modules are enabled at the same time, unexpected behaviour may occur.
 
 ## Installation
+
 - Copy this script to the Prosody plugins folder. It's the following folder on
   Debian:
 
@@ -35,8 +40,14 @@ The module should **not** be enabled together with `external_services`. If both 
   ```
 
 ## Configuration
-The configuration is like the original `external_services` module. All that has been added is the new `proxybased_external_service_host_header` attribute, which defines a header from which the host for the services is taken. If the header cannot be found in a request, the host from the service configuration will be used as a default. \
+
+The configuration is like the original `external_services` module. All that has
+been added is the new `proxybased_external_service_host_header` attribute, which
+defines a header from which the host for the services is taken. If the header
+cannot be found in a request, the host from the service configuration will be
+used as a default.\
 The default header used is `Turn-Server`.
+
 ```lua
 proxybased_external_service_secret = "<SECRET>";
 proxybased_external_service_host_header = "Turn-Server"
@@ -47,7 +58,10 @@ proxybased_external_services = {
 ```
 
 ## Example HAProxy configuration
-The following example shows how an HA proxy sitting in front of Prosody can be configured if internal and external clients are to be rooted to different turn servers.
+
+The following example shows how an HA proxy sitting in front of Prosody can be
+configured if internal and external clients are to be rooted to different turn
+servers.
 
 ```haproxy
 # Turn Settings for external clients
