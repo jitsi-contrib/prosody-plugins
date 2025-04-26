@@ -61,6 +61,11 @@
   Enforces single room per token by rejecting tokens that use wildcards or
   regex-based room names.
 
+- [token_lobby_autostart](token_lobby_autostart/)
+
+  Automatically enables the lobby for all rooms if it is not disabled explicitly
+  in the token payload.
+
 - [token lobby bypass](token_lobby_bypass/)
 
   Enables some users to bypass lobby based on token content.
