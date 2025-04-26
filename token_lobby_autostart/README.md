@@ -60,11 +60,11 @@ To disable `lobby_autostart` for a specific meeting, unset the related field in
 the token payload:
 
 ```json
-  "context": {
-    "room": {
-      "lobby_autostart": false
-    }
+"context": {
+  "room": {
+    "lobby_autostart": false
   }
+}
 ```
 
 If this field is not exist or is set as `true` then `lobby_autostart` stays
