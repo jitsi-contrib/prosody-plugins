@@ -82,51 +82,51 @@ A sample token body to activate lobby and set a password for a room:
 To enable lobby:
 
 ```json
-  "context": {
-    "room": {
-      "lobby": true
-    }
+"context": {
+  "room": {
+    "lobby": true
   }
+}
 ```
 
 To disable lobby:
 
 ```json
-  "context": {
-    "room": {
-      "lobby": false
-    }
+"context": {
+  "room": {
+    "lobby": false
   }
+}
 ```
 
 To set a password:
 
 ```json
-  "context": {
-    "room": {
-      "password": "mypassword"
-    }
+"context": {
+  "room": {
+    "password": "mypassword"
   }
+}
 ```
 
 To unset password:
 
 ```json
-  "context": {
-    "room": {
-      "password": ""
-    }
+"context": {
+  "room": {
+    "password": ""
   }
+}
 ```
 
 To allow a participant to bypass security checks:
 
 ```json
-  "context": {
-    "user": {
-      "security_bypass": true
-    }
+"context": {
+  "user": {
+    "security_bypass": true
   }
+}
 ```
 
 ## Sponsors
