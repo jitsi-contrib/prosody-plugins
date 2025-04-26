@@ -17,11 +17,7 @@ module:hook("muc-set-affiliation", function(event)
 
     local username = jid_split(jid);
 
-    if username == "focus" then
-        return;
-    end
-
-    if affiliation ~= "owner" then
+    if username == "focus" or affiliation ~= "owner" then
         return;
     end
 
@@ -56,8 +52,8 @@ module:hook("muc-occupant-left", function(event)
     local has_owner = false;
     for jid, affiliation in room:each_affiliation() do
         if affiliation == "owner" then
-            local occupant = room:get_occupant_by_real_jid(jid);
-            if occupant then
+            local real_occupant = room:get_occupant_by_real_jid(jid);
+            if real_occupant then
                 module:log("debug", "Still alive owner found: %s", jid);
                 has_owner = true;
                 break;
@@ -74,10 +70,10 @@ module:hook("muc-occupant-left", function(event)
 
     module:log("info", "No more owners in room %s, trying to assign a new one", room.jid);
 
-    for _, occupant in room:each_occupant() do
-        if occupant.role == "participant" then
-            module:log("info", "Assigning new owner: %s", occupant.bare_jid);
-            room:set_affiliation(true, occupant.bare_jid, "owner");
+    for _, current_occupant in room:each_occupant() do
+        if current_occupant.role == "participant" then
+            module:log("info", "Assigning new owner: %s", current_occupant.bare_jid);
+            room:set_affiliation(true, current_occupant.bare_jid, "owner");
             break;
         end
     end
