@@ -26,6 +26,10 @@
 
   Automatically enables the lobby for all rooms.
 
+- [lobby_autostart_on_owner](lobby_autostart_on_owner/)
+
+  Automatically enables the lobby when the moderator comes into the room.
+
 - [lobby deactivate](lobby_deactivate/)
 
   Deactivates the lobby after the first authorized participant joins.
