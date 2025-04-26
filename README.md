@@ -60,11 +60,6 @@
 
   Sets the occupant's affiliation according to the token content.
 
-- [token no wildcard](token_no_wildcard/)
-
-  Enforces single room per token by rejecting tokens that use wildcards or
-  regex-based room names.
-
 - [token_lobby_autostart](token_lobby_autostart/)
 
   Automatically enables the lobby for all rooms if it is not disabled explicitly
@@ -82,6 +77,11 @@
 
   Selectively send users to lobby based on token content. Enables lobby
   automatically if not yet activated.
+
+- [token no wildcard](token_no_wildcard/)
+
+  Enforces single room per token by rejecting tokens that use wildcards or
+  regex-based room names.
 
 - [token owner party](token_owner_party/)
 
