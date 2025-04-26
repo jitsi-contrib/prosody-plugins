@@ -1,12 +1,13 @@
 # Token Lobby Bypass
 
-This plugin allows you to let some users bypass the lobby by setting a flag in their token. 
-
+This plugin allows you to let some users bypass the lobby by setting a flag in
+their token.
 
 ## Installation
 
-- Set up [JWT auth](https://github.com/jitsi/lib-jitsi-meet/blob/master/doc/tokens.md) and check that it works before 
-  proceeding.
+- Set up
+  [JWT auth](https://github.com/jitsi/lib-jitsi-meet/blob/master/doc/tokens.md)
+  and check that it works before proceeding.
 
 - Copy this script to the Prosody plugins folder. It's the following folder on
   Debian:
@@ -36,7 +37,8 @@ This plugin allows you to let some users bypass the lobby by setting a flag in t
 
 ## A token sample
 
-To allow a user to bypass the lobby, set the `lobby_bypass` attribute to boolean `true` in `context.user`.
+To allow a user to bypass the lobby, set the `lobby_bypass` attribute to boolean
+`true` in `context.user`.
 
 A sample token body:
 
