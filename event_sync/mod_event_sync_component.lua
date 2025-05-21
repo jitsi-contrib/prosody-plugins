@@ -25,7 +25,8 @@ local json = require "util.json";
 local jid = require 'util.jid';
 local http = require "net.http";
 local timer = require 'util.timer';
-local is_healthcheck_room = module:require "util".is_healthcheck_room;
+local util = module:require 'util';
+local is_healthcheck_room = util.is_healthcheck_room;
 
 local main_muc_component_host = module:get_option_string("muc_component");
 local muc_domain_base = module:get_option_string("muc_mapper_domain_base");
