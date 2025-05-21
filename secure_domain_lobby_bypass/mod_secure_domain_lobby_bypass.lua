@@ -5,7 +5,8 @@
 
 local LOGLEVEL = "debug";
 
-local is_healthcheck_room = module:require "util".is_healthcheck_room;
+local util = module:require 'util';
+local is_healthcheck_room = util.is_healthcheck_room;
 
 module:log("info", "loaded");
 
