@@ -1,16 +1,12 @@
 local LOGLEVEL = "info"
 
-local is_admin = require "core.usermanager".is_admin
-local is_healthcheck_room = module:require "util".is_healthcheck_room
+local util = module:require 'util';
+local is_admin = util.is_admin;
+local is_healthcheck_room = util.is_healthcheck_room
 local timer = require "util.timer"
 local st = require "util.stanza"
 local uuid = require "util.uuid".generate
 module:log(LOGLEVEL, "loaded")
-
--- -----------------------------------------------------------------------------
-local function _is_admin(jid)
-    return is_admin(jid, module.host)
-end
 
 -- -----------------------------------------------------------------------------
 local function _start_recording(room, session, occupant_jid)
@@ -55,7 +51,7 @@ module:hook("muc-occupant-joined", function (event)
     local session = event.origin
     local occupant = event.occupant
 
-    if is_healthcheck_room(room.jid) or _is_admin(occupant.jid) then
+    if is_healthcheck_room(room.jid) or is_admin(occupant.bare_jid) then
         return
     end
 
