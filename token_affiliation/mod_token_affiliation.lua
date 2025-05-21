@@ -9,7 +9,7 @@ local DISABLE_CASCADING_SET = module:get_option_boolean(
 
 local util = module:require 'util';
 local is_admin = util.is_admin;
-local is_healthcheck_room = module:require "util".is_healthcheck_room
+local is_healthcheck_room = util.is_healthcheck_room
 local timer = require "util.timer"
 module:log(LOGLEVEL, "loaded")
 
