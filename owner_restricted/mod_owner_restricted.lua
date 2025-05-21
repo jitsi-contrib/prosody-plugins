@@ -1,15 +1,12 @@
 local LOGLEVEL = "debug"
 local TIMEOUT = module:get_option_number("role_timeout", 120)
 
-local is_admin = require "core.usermanager".is_admin
+local util = module:require 'util';
+local is_admin = util.is_admin;
 local is_healthcheck_room = module:require "util".is_healthcheck_room
 local it = require "util.iterators"
 local timer = require "util.timer"
 module:log("info", "loaded")
-
-local function _is_admin(jid)
-    return is_admin(jid, module.host)
-end
 
 local function terminator(room)
     if is_healthcheck_room(room.jid) then
@@ -45,7 +42,7 @@ local function terminator(room)
     -- last check before destroying the room
     module:log(LOGLEVEL, "last check before destroying the room")
     for _, o in room:each_occupant() do
-        if not _is_admin(o.jid) then
+        if not is_admin(o.bare_jid) then
             if room:get_affiliation(o.jid) == "owner" then
                 module:log(
                     LOGLEVEL,
@@ -69,7 +66,7 @@ local function trigger_terminator(room)
     -- check if there is an owner in the room
     -- do nothing if there is one
     for _, o in room:each_occupant() do
-        if not _is_admin(o.jid) then
+        if not _s_admin(o.bare_jid) then
             if room:get_affiliation(o.jid) == "owner" then
                 module:log(
                     LOGLEVEL,
@@ -98,7 +95,7 @@ end
 module:hook("muc-occupant-joined", function (event)
     local room, occupant = event.room, event.occupant
 
-    if is_healthcheck_room(room.jid) or _is_admin(occupant.jid) then
+    if is_healthcheck_room(room.jid) or is_admin(occupant.bare_jid) then
         return
     end
 
@@ -116,7 +113,7 @@ end)
 module:hook("muc-occupant-left", function (event)
     local room, occupant = event.room, event.occupant
 
-    if is_healthcheck_room(room.jid) or _is_admin(occupant.jid) then
+    if is_healthcheck_room(room.jid) or is_admin(occupant.bare_jid) then
         return
     end
 
