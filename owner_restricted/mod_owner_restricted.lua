@@ -3,7 +3,7 @@ local TIMEOUT = module:get_option_number("role_timeout", 120)
 
 local util = module:require 'util';
 local is_admin = util.is_admin;
-local is_healthcheck_room = module:require "util".is_healthcheck_room
+local is_healthcheck_room = util.is_healthcheck_room
 local it = require "util.iterators"
 local timer = require "util.timer"
 module:log("info", "loaded")
