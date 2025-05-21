@@ -7,7 +7,8 @@ local LOGLEVEL = "debug";
 
 local muc_util = module:require "muc/util";
 local valid_affiliations = muc_util.valid_affiliations;
-local is_healthcheck_room = module:require "util".is_healthcheck_room;
+local util = module:require 'util';
+local is_healthcheck_room = util.is_healthcheck_room;
 
 
 module:hook("muc-occupant-pre-join", function (event)
