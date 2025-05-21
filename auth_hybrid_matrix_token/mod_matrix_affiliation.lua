@@ -17,7 +17,8 @@
 -- the participant if she is not an admin in the related Matrix room.
 -- -----------------------------------------------------------------------------
 local basexx = require 'basexx'
-local is_admin = require "core.usermanager".is_admin
+local util = module:require 'util';
+local is_admin = util.is_admin;
 local is_healthcheck_room = module:require "util".is_healthcheck_room
 local jid_split = require "util.jid".split
 local timer = require "util.timer"
@@ -30,14 +31,10 @@ local DISABLE_CASCADING_SET = module:get_option_boolean(
     "disable_cascading_set", false
 )
 
-local function _is_admin(jid)
-    return is_admin(jid, module.host)
-end
-
 module:hook("muc-occupant-joined", function (event)
     local room, occupant = event.room, event.occupant
 
-    if is_healthcheck_room(room.jid) or _is_admin(occupant.jid) then
+    if is_healthcheck_room(room.jid) or is_admin(occupant.bare_jid) then
         module:log(LOGLEVEL, "skip affiliation, %s", occupant.jid)
         return
     end
