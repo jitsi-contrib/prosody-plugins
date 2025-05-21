@@ -19,7 +19,7 @@
 local basexx = require 'basexx'
 local util = module:require 'util';
 local is_admin = util.is_admin;
-local is_healthcheck_room = module:require "util".is_healthcheck_room
+local is_healthcheck_room = util.is_healthcheck_room
 local jid_split = require "util.jid".split
 local timer = require "util.timer"
 local LOGLEVEL = "debug"
