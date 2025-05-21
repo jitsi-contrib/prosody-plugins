@@ -7,13 +7,8 @@
 local LOGLEVEL = "info";
 
 local st = require "util.stanza";
-local um_is_admin = require "core.usermanager".is_admin;
-
-
-local function is_admin(jid)
-    return um_is_admin(jid, module.host);
-end
-
+local util = module:require 'util';
+local is_admin = util.is_admin;
 
 local function verify_no_wildcard_in_token(session, stanza)
     local user_jid = stanza.attr.from;
