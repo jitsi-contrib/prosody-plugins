@@ -13,7 +13,8 @@
 -- check her again in Jitsi lobby.
 -- -----------------------------------------------------------------------------
 local basexx = require 'basexx'
-local is_healthcheck_room = module:require "util".is_healthcheck_room
+local util = module:require 'util'
+local is_healthcheck_room = util.is_healthcheck_room
 local jid_split = require "util.jid".split
 local LOGLEVEL = "debug"
 
