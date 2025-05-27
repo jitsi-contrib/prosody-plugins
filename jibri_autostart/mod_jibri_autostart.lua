@@ -2,6 +2,7 @@ local LOGLEVEL = "info"
 
 local util = module:require 'util';
 local is_admin = util.is_admin;
+local is_feature_allowed = util.is_feature_allowed;
 local is_healthcheck_room = util.is_healthcheck_room
 local timer = require "util.timer"
 local st = require "util.stanza"
@@ -19,12 +20,15 @@ local function _start_recording(room, session, occupant_jid)
     local occupant = room:get_occupant_by_real_jid(occupant_jid)
 
     -- check recording permission
-    if occupant == nil or occupant.role ~= "moderator" then
-        return
-    elseif
-        session.jitsi_meet_context_features ~= nil and
-        session.jitsi_meet_context_features["recording"] ~= true
-    then
+    local is_recording_allowed = is_feature_allowed(
+      "recording",
+      session.jitsi_meet_context_features,
+      session.granted_jitsi_meet_context_features,
+      occupant.role == 'moderator'
+    );
+
+    -- if not allowed, skip.
+    if not is_recording_allowed then
         return
     end
 
