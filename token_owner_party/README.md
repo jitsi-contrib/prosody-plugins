@@ -7,6 +7,8 @@ and `token_affiliation` plugins.
 If you have the `muc_wait_for_host` module then don't use this module, check
 [owner_restricted](../owner_restricted) instead.
 
+> **Warning**: This pluging doesn't work correctly with breakout rooms.
+
 ## Installation
 
 - Copy this script to the Prosody plugins folder. It's the following folder on
