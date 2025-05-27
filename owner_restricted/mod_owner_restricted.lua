@@ -66,7 +66,7 @@ local function trigger_terminator(room)
     -- check if there is an owner in the room
     -- do nothing if there is one
     for _, o in room:each_occupant() do
-        if not _s_admin(o.bare_jid) then
+        if not is_admin(o.bare_jid) then
             if room:get_affiliation(o.jid) == "owner" then
                 module:log(
                     LOGLEVEL,
