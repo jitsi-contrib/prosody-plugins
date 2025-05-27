@@ -8,7 +8,7 @@ still no moderator after `timeout`.
 When the last moderator leaves the room, it waits `timeout` seconds and ends the
 meeting if the moderator doesn't come back.
 
-> **Warning**: This pluging doesn't work correctly with breakout rooms.
+> **Warning**: This plugin doesn't work correctly with breakout rooms.
 
 ## Installation
 
