@@ -25,7 +25,7 @@ local function _start_recording(room, session, occupant_jid)
       session.jitsi_meet_context_features,
       session.granted_jitsi_meet_context_features,
       occupant.role == 'moderator'
-    );
+    )
 
     -- if not allowed, skip.
     if not is_recording_allowed then
