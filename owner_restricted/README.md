@@ -8,6 +8,8 @@ still no moderator after `timeout`.
 When the last moderator leaves the room, it waits `timeout` seconds and ends the
 meeting if the moderator doesn't come back.
 
+> **Warning**: This pluging doesn't work correctly with breakout rooms.
+
 ## Installation
 
 - Copy this script to the Prosody plugins folder. It's the following folder on
