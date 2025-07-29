@@ -62,7 +62,7 @@ local host = module.host
 function init_session(event)
     local session, request = event.session, event.request
     local query = request.url.query
-    local token
+    local token = nil
 
     -- extract token from Authorization header
     if request.headers["authorization"] then
