@@ -24,11 +24,15 @@ end
 
 module:depends("jitsi_session")
 
-local uvsIssuer = {"*"}
+local uvsIssuer = "*"
 local issuer = module:get_option("uvs_issuer", nil)
 if issuer then
-    uvsIssuer = { string.format("%s", issuer) }
+    uvsIssuer = string.format("%s", issuer)
 end
+
+-- Adding the uvsIssuer in the token_util's accepted issuers
+local issuers = { token_util.appId, uvsIssuer }
+token_util:set_asap_accepted_issuers(issuers)
 
 local uvsUrl = module:get_option("uvs_base_url", nil)
 if uvsUrl == nil then
@@ -219,10 +223,7 @@ local function matrix_handler(session, payload)
     end
 
     session.public_key = "notused"
-    local res, error, reason = token_util:process_and_verify_token(
-        session,
-        uvsIssuer
-    )
+    local res, error, reason = token_util:process_and_verify_token(session)
     if res == false then
         module:log(
             "warn",
