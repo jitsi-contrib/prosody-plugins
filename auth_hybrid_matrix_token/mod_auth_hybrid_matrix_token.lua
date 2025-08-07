@@ -47,6 +47,8 @@ if uvsAuthToken == nil then
     )
 end
 
+local uvsDisableMembershipVerification = module:get_option("uvs_disable_membership_verification", false)
+
 local measure_pre_fetch_fail = module:measure('pre_fetch_fail', 'counter')
 local measure_verify_fail = module:measure('verify_fail', 'counter')
 local measure_success = module:measure('success', 'counter')
@@ -77,7 +79,7 @@ function init_session(event)
     if query ~= nil then
         local params = formdecode(query)
 
-	if params then
+        if params then
             session.jitsi_room = params.room
 
             if params.token then
@@ -214,6 +216,36 @@ local function is_user_in_room(session, matrixPayload)
     return true
 end
 
+local function is_user_present(matrixPayload)
+    local url = string.format("%s/verify/user", uvsUrl)
+    local options = get_options(matrixPayload)
+    local wait, done = async.waiter()
+    local httpRes
+
+    local function cb(resBody, resCode, _req, _res)
+        if resCode == 200 then
+            httpRes = json.decode(resBody)
+        end
+
+        done()
+    end
+
+    http.request(url, options, cb)
+    wait()
+
+    -- no result
+    if not (httpRes and httpRes.results) then
+        return false
+    end
+
+    -- not a member of Matrix room
+    if not (httpRes.results.user) then
+        return false
+    end
+
+    return true
+end
+
 local function matrix_handler(session, payload)
     if uvsUrl == nil then
         module:log("warn", "Missing 'uvs_base_url' config")
@@ -228,11 +260,11 @@ local function matrix_handler(session, payload)
         module:log(
             "warn",
             "Error verifying token err:%s, reason:%s tenant:%s room:%s, agent:%s",
-	    error,
-	    reason,
-	    session.jitsi_web_query_prefix,
-	    session.jitsi_web_query_room,
-	    session.user_agent_header
+            error,
+            reason,
+            session.jitsi_web_query_prefix,
+            session.jitsi_web_query_room,
+            session.user_agent_header
         )
         session.auth_token = nil
         measure_verify_fail(1)
@@ -256,11 +288,18 @@ local function matrix_handler(session, payload)
         return false, "not-allowed", "Jitsi room does not match Matrix room"
     end
 
-    if not is_user_in_room(session, payload.context.matrix) then
-        module:log("warn", "Matrix token is invalid or user does not in room")
+    local userVerified
+    if uvsDisableMembershipVerification then
+        userVerified = is_user_present(payload.context.matrix)
+    else
+        userVerified = is_user_in_room(session, payload.context.matrix)
+    end
+
+    if not userVerified then
+        module:log("warn", "Matrix token verification failed: user does not exist or is not in the room")
         session.auth_token = nil
         measure_ban(1)
-        return false, "not-allowed", "Matrix token invalid or not in room"
+        return false, "not-allowed", "Matrix token verification failed: user not found or not in room"
     end
 
     session.jitsi_meet_context_matrix = payload.context.matrix
@@ -291,11 +330,11 @@ local function token_handler(session)
         module:log(
             "warn",
             "Error verifying token err:%s, reason:%s tenant:%s room:%s, agent:%s",
-	    error,
-	    reason,
-	    session.jitsi_web_query_prefix,
-	    session.jitsi_web_query_room,
-	    session.user_agent_header
+            error,
+            reason,
+            session.jitsi_web_query_prefix,
+            session.jitsi_web_query_room,
+            session.user_agent_header
         )
         session.auth_token = nil
         measure_verify_fail(1)
