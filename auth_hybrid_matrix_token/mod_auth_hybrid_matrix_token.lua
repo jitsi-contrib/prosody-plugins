@@ -47,7 +47,10 @@ if uvsAuthToken == nil then
     )
 end
 
-local uvsDisableMembershipVerification = module:get_option("uvs_disable_membership_verification", false)
+local uvsDisableMembershipVerification = module:get_option(
+    "uvs_disable_membership_verification",
+    false
+)
 
 local measure_pre_fetch_fail = module:measure('pre_fetch_fail', 'counter')
 local measure_verify_fail = module:measure('verify_fail', 'counter')
@@ -206,7 +209,8 @@ local function is_user_in_room(session, matrixPayload)
     session.auth_matrix_user_verification_is_owner = false
     if
         httpRes.power_levels and httpRes.power_levels.user and
-        httpRes.power_levels.room and httpRes.power_levels.room.state_default and
+        httpRes.power_levels.room and
+        httpRes.power_levels.room.state_default and
         httpRes.power_levels.user >= httpRes.power_levels.room.state_default
     then
         session.matrix_affiliation = "owner"
@@ -238,7 +242,7 @@ local function is_user_present(matrixPayload)
         return false
     end
 
-    -- not a member of Matrix room
+    -- not a Matrix user
     if not (httpRes.results.user) then
         return false
     end
@@ -296,10 +300,17 @@ local function matrix_handler(session, payload)
     end
 
     if not userVerified then
-        module:log("warn", "Matrix token verification failed: user does not exist or is not in the room")
+        module:log(
+            "warn",
+            "Matrix token verification failed: user not found or not in room"
+        )
         session.auth_token = nil
         measure_ban(1)
-        return false, "not-allowed", "Matrix token verification failed: user not found or not in room"
+        return (
+            false,
+            "not-allowed",
+            "Matrix token verification failed: user not found or not in room"
+        )
     end
 
     session.jitsi_meet_context_matrix = payload.context.matrix
@@ -317,8 +328,8 @@ local function token_handler(session)
         module:log(
             "warn",
             "Error verifying token on pre authentication stage:%s, reason:%s",
-                preEvent.error,
-                preEvent.reason
+            preEvent.error,
+            preEvent.reason
         )
         session.auth_token = nil
         measure_pre_fetch_fail(1)
