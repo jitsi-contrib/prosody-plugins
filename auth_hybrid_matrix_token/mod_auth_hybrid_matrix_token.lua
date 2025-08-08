@@ -306,11 +306,9 @@ local function matrix_handler(session, payload)
         )
         session.auth_token = nil
         measure_ban(1)
-        return (
-            false,
+        return false,
             "not-allowed",
             "Matrix token verification failed: user not found or not in room"
-        )
     end
 
     session.jitsi_meet_context_matrix = payload.context.matrix
