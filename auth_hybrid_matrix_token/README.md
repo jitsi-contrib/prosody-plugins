@@ -37,6 +37,13 @@ token and handles it depending on its type.
     -- (optional) UVS auth token, if authentication enabled on UVS.
     -- Uncomment and set the right token if necessary.
     --uvs_auth_token = "changeme"
+
+    -- (optional) Disable room membership verification. When set to true, the 
+    -- module will only check whether the user exists on the Matrix server, 
+    -- without verifying their membership in the room. This is useful if you 
+    -- don’t want to generate a Synapse token for the UVS, as it becomes 
+    -- unnecessary in this case. Defaults to false.
+    -- uvs_disable_membership_verification = true
     }
   ```
 
