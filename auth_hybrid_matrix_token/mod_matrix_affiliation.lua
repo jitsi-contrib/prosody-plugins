@@ -44,7 +44,7 @@ module:hook("muc-occupant-joined", function (event)
         return
     end
 
-    if session.token_affiliation_checked then
+    if session.matrix_affiliation_checked then
         module:log(LOGLEVEL, "skip affiliation, already checked")
         return
     end
@@ -91,7 +91,7 @@ module:hook("muc-occupant-joined", function (event)
         timer.add_task(0.2 * i, setAffiliation)
     end
     setAffiliation()
-    session.token_affiliation_checked = true
+    session.matrix_affiliation_checked = true
 
     module:log( "info",
         "affiliation is downgraded, occupant: %s",
