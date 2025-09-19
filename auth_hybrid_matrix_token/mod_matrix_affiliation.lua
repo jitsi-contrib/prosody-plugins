@@ -32,15 +32,20 @@ local DISABLE_CASCADING_SET = module:get_option_boolean(
 )
 
 module:hook("muc-occupant-joined", function (event)
-    local room, occupant = event.room, event.occupant
+    local room, occupant, session = event.room, event.occupant, event.origin
 
     if is_healthcheck_room(room.jid) or is_admin(occupant.bare_jid) then
         module:log(LOGLEVEL, "skip affiliation, %s", occupant.jid)
         return
     end
 
-    if not event.origin.auth_token then
+    if not session.auth_token then
         module:log(LOGLEVEL, "skip affiliation, no token")
+        return
+    end
+
+    if session.token_affiliation_checked then
+        module:log(LOGLEVEL, "skip affiliation, already checked")
         return
     end
 
@@ -65,7 +70,7 @@ module:hook("muc-occupant-joined", function (event)
         end
     end
 
-    if event.origin.matrix_affiliation == "owner" then
+    if session.matrix_affiliation == "owner" then
         module:log(LOGLEVEL, "skip downgrading, valid Matrix owner")
         return
     end
@@ -86,9 +91,10 @@ module:hook("muc-occupant-joined", function (event)
         timer.add_task(0.2 * i, setAffiliation)
     end
     setAffiliation()
+    session.token_affiliation_checked = true
 
     module:log( "info",
-	"affiliation is downgraded, occupant: %s",
-	occupant.bare_jid
+        "affiliation is downgraded, occupant: %s",
+        occupant.bare_jid
     )
 end)
