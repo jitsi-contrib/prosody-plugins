@@ -14,20 +14,25 @@ local timer = require "util.timer"
 module:log(LOGLEVEL, "loaded")
 
 module:hook("muc-occupant-joined", function (event)
-    local room, occupant = event.room, event.occupant
+    local room, occupant, session = event.room, event.occupant, event.origin
 
     if is_healthcheck_room(room.jid) or is_admin(occupant.bare_jid) then
         module:log(LOGLEVEL, "skip affiliation, %s", occupant.jid)
         return
     end
 
-    if not event.origin.auth_token then
+    if not session.auth_token then
         module:log(LOGLEVEL, "skip affiliation, no token")
         return
     end
 
+    if session.token_affiliation_checked then
+        module:log(LOGLEVEL, "skip affiliation, already checked")
+        return
+    end
+
     local affiliation = "member"
-    local context_user = event.origin.jitsi_meet_context_user
+    local context_user = session.jitsi_meet_context_user
 
     if context_user then
         if context_user["affiliation"] == "owner" then
@@ -54,6 +59,7 @@ module:hook("muc-occupant-joined", function (event)
         timer.add_task(0.2 * i, setAffiliation)
     end
     setAffiliation()
+    session.token_affiliation_checked = true
 
     module:log(LOGLEVEL, "affiliation: %s", affiliation)
 end)
