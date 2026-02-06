@@ -9,6 +9,8 @@
 local util = module:require "util";
 local is_healthcheck_room = util.is_healthcheck_room;
 
+module:log("info", "loaded")
+
 
 module:hook("muc-room-pre-create", function (event)
    local room = event.room;
