@@ -4,7 +4,7 @@ local LOGLEVEL = "debug"
 -- affiliation. Cascading updates are needed when the authentication is enabled
 -- in Jicofo.
 local DISABLE_CASCADING_SET = module:get_option_boolean(
-    "disable_cascading_set", false
+    "disable_cascading_set", true
 )
 
 local util = module:require 'util';
