@@ -12,7 +12,7 @@ This plugin sets the occupant's affiliation according to the token content.
   wget -O mod_token_affiliation.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/token_affiliation/mod_token_affiliation.lua
   ```
 
-- Enable module in your prosody config.
+- Enable module in your prosody config and disable auto-ownership.
 
   _/etc/prosody/conf.d/meet.mydomain.com.cfg.lua_
 
@@ -21,6 +21,9 @@ This plugin sets the occupant's affiliation according to the token content.
     modules_enabled = {
       "token_verification";
       "token_affiliation";
+    }
+
+    wait_for_host_disable_auto_owners = true
   ```
 
 - Disable auto-ownership on Jicofo and let the module set the affiliations

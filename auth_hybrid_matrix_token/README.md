@@ -61,9 +61,9 @@ token and handles it depending on its type.
 
   ```lua
   Component "conference.meet.mydomain.com" "muc"
-      modules_enabled = {
-          "matrix_affiliation";
-      }
+    modules_enabled = {
+      "matrix_affiliation";
+    }
   ```
 
 - Lobby bypass
@@ -80,9 +80,9 @@ token and handles it depending on its type.
 
   ```lua
   Component "conference.meet.mydomain.com" "muc"
-      modules_enabled = {
-          "matrix_lobby_bypass";
-      }
+    modules_enabled = {
+      "matrix_lobby_bypass";
+    }
   ```
 
 - Restart the services
