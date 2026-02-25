@@ -149,6 +149,7 @@ function EventData:on_occupant_joined(occupant_jid, event_origin)
         occupant_jid   = occupant_jid;
         name  = user_context.name;
         id  = user_context.id;
+        affiliation = user_context.affiliation;
         email  = user_context.email;
         joined_at = now();
         left_at = nil;
@@ -297,7 +298,7 @@ function occupant_joined(event)
     end
 
     local occupant_data = room_data:on_occupant_joined(occupant_jid, event.origin);
-    module:log("info", "New occupant - %s", json.encode(occupant_data));
+    module:log("info", "New occupant in room: %s - %s", room.jid, json.encode(occupant_data));
 
     local payload = {
             ['event_name'] = 'muc-occupant-joined';
@@ -330,7 +331,7 @@ function occupant_left(event)
     end
 
     local occupant_data = room_data:on_occupant_leave(occupant_jid, room);
-    module:log("info", "Occupant left - %s", json.encode(occupant_data));
+    module:log("info", "Occupant left in room: %s - %s", room.jid, json.encode(occupant_data));
 
     local payload = {
             ['event_name'] = 'muc-occupant-left';
