@@ -3,7 +3,7 @@
 This prosody component sends HTTP POST request with JSON payload to external API
 when occupant or room events are triggered.
 
-If JWT token auth is used, `name`, `email`, `id` and `affiliation` from the user context is
+If JWT token auth is used, `name`, `email` and `id` from the user context is
 also included in the JSON payload for occupant data.
 
 ## Events
@@ -87,7 +87,6 @@ with JSON payload containing:
   - name (if JWT token auth used. Taken from user context.)
   - email (if JWT token auth used. Taken from user context.)
   - id (if JWT token auth used. Taken from user context.)
-  - affiliation (if JWT token auth used. Taken from user context.)
 
 Example:
 
@@ -102,7 +101,6 @@ Example:
     "name": "James Barrow",
     "email": "j.barrow@domain.com",
     "id": "00380324-a840-400d-880f-7ee0933b7556",
-    "affiliation": "member",
     "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
     "joined_at": 1625823996
   }
@@ -128,7 +126,6 @@ with JSON payload containing:
   - name (if JWT token auth used. Taken from user context.)
   - email (if JWT token auth used. Taken from user context.)
   - id (if JWT token auth used. Taken from user context.)
-  - affiliation (if JWT token auth used. Taken from user context.)
 
 Example:
 
@@ -143,7 +140,6 @@ Example:
     "name": "James Barrow",
     "email": "j.barrow@domain.com",
     "id": "00380324-a840-400d-880f-7ee0933b7556",
-    "affiliation": "member",
     "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
     "joined_at": 1625823996,
     "left_at": 1625824035
@@ -229,6 +225,6 @@ Component "esync.meet.mydomain.com" "event_sync_component"
     -- Optionally 
     -- include total_dominant_speaker_time (milliseconds) in payload for occupant-left and room-destroyed
     include_speaker_stats = true
-    -- include complete JWT user context in payload
+    -- include complete JWT user context in payload for occupant joined and occupant left
     include_user_info = true
 ```
