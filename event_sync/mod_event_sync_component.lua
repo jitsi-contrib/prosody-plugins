@@ -10,6 +10,7 @@
 --
 --        --- The following are all optional
 --        include_speaker_stats = true  -- if true, total_dominant_speaker_time included in occupant payload
+--        include_user_info = true  -- if true, user info from jitsi_meet_context_user included in occupant payload
 --        api_headers = {
 --            ["Authorization"] = "Bearer TOKEN-237958623045";
 --        }
@@ -39,6 +40,7 @@ local api_retry_count = tonumber(module:get_option("api_retry_count", 3));
 local api_retry_delay = tonumber(module:get_option("api_retry_delay", 1));
 
 local include_speaker_stats = module:get_option("include_speaker_stats", false);
+local include_user_info = module:get_option("include_user_info", false);
 
 
 -- Option for user to control HTTP response codes that will result in a retry.
@@ -143,18 +145,23 @@ end
 --- Handle new occupant joining room
 function EventData:on_occupant_joined(occupant_jid, event_origin)
     local user_context = event_origin.jitsi_meet_context_user or {};
-
+    local occupant_data = {};
     -- N.B. we only store user details on join and assume they don't change throughout the duration of the meeting
-    local occupant_data = {
-        occupant_jid   = occupant_jid;
-        name  = user_context.name;
-        id  = user_context.id;
-        affiliation = user_context.affiliation;
-        email  = user_context.email;
-        joined_at = now();
-        left_at = nil;
+    if include_user_info then
+        for k,v in pairs(user_context) do
+            occupant_data[k] = v;
+        end
+    else
+        occupant_data = {
+            occupant_jid   = occupant_jid;
+            name  = user_context.name;
+            id  = user_context.id;
+            email  = user_context.email;
     };
+    end
 
+    occupant_data["joined_at"] = now();
+    occupant_data["left_at"] = nil;
     self.occupants[occupant_jid] = occupant_data;
     self.active[occupant_jid] = true;
 

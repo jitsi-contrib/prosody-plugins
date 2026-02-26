@@ -226,6 +226,9 @@ Component "esync.meet.mydomain.com" "event_sync_component"
         return code >= 500 or code == 408
     end
 
-    -- Optionally include total_dominant_speaker_time (milliseconds) in payload for occupant-left and room-destroyed
+    -- Optionally 
+    -- include total_dominant_speaker_time (milliseconds) in payload for occupant-left and room-destroyed
     include_speaker_stats = true
+    -- include complete JWT user context in payload
+    include_user_info = true
 ```
