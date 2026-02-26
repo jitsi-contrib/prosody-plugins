@@ -153,13 +153,13 @@ function EventData:on_occupant_joined(occupant_jid, event_origin)
         end
     else
         occupant_data = {
-            occupant_jid   = occupant_jid;
             name  = user_context.name;
             id  = user_context.id;
             email  = user_context.email;
-    };
+        };
     end
 
+    occupant_data["occupant_jid"] = occupant_jid;
     occupant_data["joined_at"] = now();
     occupant_data["left_at"] = nil;
     self.occupants[occupant_jid] = occupant_data;
