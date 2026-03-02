@@ -1,15 +1,15 @@
 local LOGLEVEL = "debug"
 local jid = require("util.jid")
 local util = module:require 'util'
-local is_healthcheck_room = util.is_healthcheck_room
 local it = require "util.iterators"
 local st = require "util.stanza"
 local timer = require "util.timer"
+local is_healthcheck_room = util.is_healthcheck_room
+local extract_subdomain = util.extract_subdomain;
 
+local conference_max_minutes = module:get_option("conference_max_minutes", {});
 local max_minutes_for_rooms = module:get_option("max_minutes_for_rooms", {});
 local max_minutes_for_subdomains = module:get_option("max_minutes_for_subdomains", {});
-
-module:log(LOGLEVEL, "loaded")
 
 function handle_room_created(event)
     local room = event.room
@@ -21,7 +21,7 @@ function handle_room_created(event)
 
     local room_name = jid.node(room.jid);
     local subdomain = extract_subdomain(room_name);
-    local max_minutes = max_minutes_for_rooms[room_name] or max_minutes_for_subdomains[subdomain];
+    local max_minutes = max_minutes_for_rooms[room_name] or max_minutes_for_subdomains[subdomain] or conference_max_minutes;
     local TIMEOUT = max_minutes * 60
     
     -- announce the expiration time
@@ -53,7 +53,7 @@ function handle_room_created(event)
     end)
 end
 
-if next(max_minutes_for_subdomains) ~= nil or next(max_minutes_for_rooms) ~= nil then
+if next(max_minutes_for_subdomains) ~= nil or next(max_minutes_for_rooms) ~= nil or next(conference_max_minutes) ~= nil then
     module:hook("muc-room-created", handle_room_created);
     module:log('info', 'loaded');
 else

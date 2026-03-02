@@ -23,6 +23,8 @@ This plugin allows you to set a time limit to the conference based on the room n
       "per_room_time_restricted";
     }
 
+    conference_max_minutes = 10 -- default time limit for all rooms
+
     --- configure you overrides --
 
     max_minutes_for_rooms = {   -- define this to set limit for specific rooms
