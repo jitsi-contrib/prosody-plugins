@@ -23,7 +23,7 @@ function handle_room_created(event)
     local subdomain = extract_subdomain(room_name);
     local max_minutes = max_minutes_for_rooms[room_name] or max_minutes_for_subdomains[subdomain] or conference_max_minutes;
     local TIMEOUT = max_minutes * 60
-    
+
     -- announce the expiration time
     room:broadcast_message(
         st.message({ type="groupchat", from=room.jid })
