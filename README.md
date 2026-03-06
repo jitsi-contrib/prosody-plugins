@@ -43,6 +43,11 @@
   Extends the capabilities of mod_muc_max_occupants by allowing different max
   occupancy based on the room name or subdomain.
 
+- [per_room_time_restricted](per_room_time_restricted/)
+
+  Allows to set a time limit to the conference based on the room name or
+  subdomain.
+
 - [proxybased external services](proxybased_external_services/)
 
   extends `external_services` module to allow redirection of different clients

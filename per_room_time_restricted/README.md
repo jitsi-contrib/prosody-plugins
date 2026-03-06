@@ -1,6 +1,7 @@
 # Per Room Time Restricted
 
-This plugin allows you to set a time limit to the conference based on the room name or subdomain.
+This plugin allows you to set a time limit to the conference based on the room
+name or subdomain.
 
 ## Installation
 
@@ -39,8 +40,8 @@ This plugin allows you to set a time limit to the conference based on the room n
   ```
 
   If a room matches entries in both `max_minutes_for_rooms` and
-  `max_minutes_for_subdomains` -- e.g. in the case of `/classroom/cs101` in
-  the example config above -- then `max_minutes_for_rooms` takes precedence.
+  `max_minutes_for_subdomains` (_e.g. in the case of `/classroom/cs101` in the
+  example config above_) then `max_minutes_for_rooms` takes precedence.
 
 - Restart the services
 
