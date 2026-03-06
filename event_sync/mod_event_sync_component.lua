@@ -178,7 +178,11 @@ function EventData:on_occupant_leave(occupant_jid, room)
     end
 
     if include_speaker_stats and room.speakerStats then
-        occupant_data['total_dominant_speaker_time'] = room.speakerStats[occupant_jid].totalDominantSpeakerTime
+        if room.speakerStats[occupant_jid] then
+            occupant_data['total_dominant_speaker_time'] = room.speakerStats[occupant_jid].totalDominantSpeakerTime
+        else
+            occupant_data['total_dominant_speaker_time'] = 0
+        end
     end
 
     return occupant_data;
