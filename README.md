@@ -61,7 +61,7 @@
 
   Sets a time limit to the conference.
 
-- [token affiliation](token_affiliation/)
+- [token affiliation_legacy](token_affiliation_legacy/)
 
   Sets the occupant's affiliation according to the token content.
 

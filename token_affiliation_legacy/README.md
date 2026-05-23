@@ -1,6 +1,9 @@
-# Token Affiliation
+# Token Affiliation Legacy
 
 This plugin sets the occupant's affiliation according to the token content.
+
+Jitsi officially provides a `token_affiliation` module now. Therefore, this
+module was renamed as legacy.
 
 ## Installation
 
@@ -9,7 +12,7 @@ This plugin sets the occupant's affiliation according to the token content.
 
   ```bash
   cd /usr/share/jitsi-meet/prosody-plugins/
-  wget -O mod_token_affiliation.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/token_affiliation/mod_token_affiliation.lua
+  wget -O mod_token_affiliation_legacy.lua https://raw.githubusercontent.com/jitsi-contrib/prosody-plugins/main/token_affiliation_legacy/mod_token_affiliation_legacy.lua
   ```
 
 - Enable module in your prosody config and disable auto-ownership.
@@ -20,7 +23,7 @@ This plugin sets the occupant's affiliation according to the token content.
   Component "conference.meet.mydomain.com" "muc"
     modules_enabled = {
       "token_verification";
-      "token_affiliation";
+      "token_affiliation_legacy";
     }
 
     wait_for_host_disable_auto_owners = true
