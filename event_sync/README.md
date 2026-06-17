@@ -6,6 +6,13 @@ when occupant or room events are triggered.
 If JWT token auth is used, `name`, `email` and `id` from the user context is
 also included in the JSON payload for occupant data.
 
+For anonymous/guest meetings there is no JWT, so this user context is empty. If
+`include_presence_fallback` is enabled, the occupant's `name` and `email` are
+then taken from their MUC presence (the display name and email set on the
+prejoin screen) for any field the token did not provide. These presence values
+are user-controlled and therefore untrusted, so this fallback is disabled by
+default.
+
 ## Events
 
 ### muc-room-created
@@ -84,8 +91,8 @@ with JSON payload containing:
 - occupant
   - occupant_jid
   - joined_at
-  - name (if JWT token auth used. Taken from user context.)
-  - email (if JWT token auth used. Taken from user context.)
+  - name (from JWT user context; or from MUC presence if `include_presence_fallback` is enabled)
+  - email (from JWT user context; or from MUC presence if `include_presence_fallback` is enabled)
   - id (if JWT token auth used. Taken from user context.)
 
 Example:
@@ -123,8 +130,8 @@ with JSON payload containing:
   - occupant_jid
   - joined_at
   - left_at
-  - name (if JWT token auth used. Taken from user context.)
-  - email (if JWT token auth used. Taken from user context.)
+  - name (from JWT user context; or from MUC presence if `include_presence_fallback` is enabled)
+  - email (from JWT user context; or from MUC presence if `include_presence_fallback` is enabled)
   - id (if JWT token auth used. Taken from user context.)
 
 Example:
@@ -227,4 +234,8 @@ Component "esync.meet.mydomain.com" "event_sync_component"
     include_speaker_stats = true
     -- include complete JWT user context in payload for occupant joined and occupant left
     include_user_info = true
+
+    -- fall back to MUC presence nick/email when the JWT user context is missing
+    -- (e.g. anonymous/guest meetings). Values are user-controlled/untrusted; off by default.
+    include_presence_fallback = true
 ```
