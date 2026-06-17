@@ -11,6 +11,7 @@
 --        --- The following are all optional
 --        include_speaker_stats = true  -- if true, total_dominant_speaker_time included in occupant payload
 --        include_user_info = true  -- if true, user info from jitsi_meet_context_user included in occupant payload
+--        include_presence_fallback = true  -- fall back to presence nick/email when no JWT (off by default)
 --        api_headers = {
 --            ["Authorization"] = "Bearer TOKEN-237958623045";
 --        }
@@ -41,6 +42,7 @@ local api_retry_delay = tonumber(module:get_option("api_retry_delay", 1));
 
 local include_speaker_stats = module:get_option("include_speaker_stats", false);
 local include_user_info = module:get_option("include_user_info", false);
+local include_presence_fallback = module:get_option("include_presence_fallback", false);
 
 
 -- Option for user to control HTTP response codes that will result in a retry.
@@ -143,7 +145,7 @@ function new_EventData(room_jid)
 end
 
 --- Handle new occupant joining room
-function EventData:on_occupant_joined(occupant_jid, event_origin)
+function EventData:on_occupant_joined(occupant_jid, event_origin, presence)
     local user_context = event_origin.jitsi_meet_context_user or {};
     local occupant_data = {
         occupant_jid = occupant_jid;
@@ -159,6 +161,22 @@ function EventData:on_occupant_joined(occupant_jid, event_origin)
         occupant_data["name"]  = user_context.name;
         occupant_data["id"]  = user_context.id;
         occupant_data["email"]  = user_context.email;
+    end
+
+    -- For anonymous / guest meetings (no JWT) the token context is empty, but
+    -- the participant's MUC presence still carries the display name (XEP-0172
+    -- <nick>) and email they set at the prejoin screen. Fall back to those so
+    -- consumers aren't left with an anonymous occupant. Only fills fields the
+    -- token did not already provide, so JWT deployments are unaffected. These
+    -- presence values are user-controlled (and therefore untrusted), so this is
+    -- gated behind include_presence_fallback and disabled by default.
+    if include_presence_fallback and presence then
+        if not occupant_data["name"] then
+            occupant_data["name"] = presence:get_child_text("nick", "http://jabber.org/protocol/nick");
+        end
+        if not occupant_data["email"] then
+            occupant_data["email"] = presence:get_child_text("email");
+        end
     end
 
     self.occupants[occupant_jid] = occupant_data;
@@ -307,7 +325,8 @@ function occupant_joined(event)
         return;
     end
 
-    local occupant_data = room_data:on_occupant_joined(occupant_jid, event.origin);
+    local presence = (event.occupant and event.occupant:get_presence()) or event.stanza;
+    local occupant_data = room_data:on_occupant_joined(occupant_jid, event.origin, presence);
     module:log("info", "New occupant in room: %s - %s", room.jid, json.encode(occupant_data));
 
     local payload = {
