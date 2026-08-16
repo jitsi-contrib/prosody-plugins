@@ -14,6 +14,11 @@
 
   Sends HTTP POST to external API when occupant or room events triggered.
 
+- [force_async_transcription](force_async_transcription/)
+
+  Enables the async transcription for all rooms. It is needed by
+  [opus-transcriber-proxy](https://github.com/jitsi/opus-transcriber-proxy).
+
 - [frozen nick](frozen_nick/)
 
   Prevents users from changing display name set by JWT auth.
