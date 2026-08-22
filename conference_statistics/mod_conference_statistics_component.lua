@@ -21,7 +21,8 @@
 ---
 ---     -- Optional safety limits. When a limit is reached, collection continues and
 ---     -- the resulting JSON contains a limit_reached entry in its errors array.
----     max_chat_messages = 50000
+---     max_chat_messages = 2000
+---     max_chat_message_length = 4096
 ---     max_tracked_connections = 10000
 ---     max_errors = 1000
 ---
@@ -66,7 +67,8 @@ local api_timeout = tonumber(module:get_option("api_timeout", 20)) or 20;
 local api_retry_count = tonumber(module:get_option("api_retry_count", 3)) or 3;
 local api_retry_delay = tonumber(module:get_option("api_retry_delay", 1)) or 1;
 local configured_api_headers = module:get_option("api_headers", {});
-local max_chat_messages = tonumber(module:get_option("max_chat_messages", 50000)) or 50000;
+local max_chat_messages = tonumber(module:get_option("max_chat_messages", 2000)) or 2000;
+local max_chat_message_length = tonumber(module:get_option("max_chat_message_length", 4096)) or 4096;
 local max_tracked_connections = tonumber(module:get_option("max_tracked_connections", 10000)) or 10000;
 local max_errors = tonumber(module:get_option("max_errors", 1000)) or 1000;
 
@@ -82,6 +84,7 @@ api_timeout = math.max(1, api_timeout);
 api_retry_count = math.max(0, math.floor(api_retry_count));
 api_retry_delay = math.max(0, api_retry_delay);
 max_chat_messages = math.max(0, math.floor(max_chat_messages));
+max_chat_message_length = math.max(1, math.floor(max_chat_message_length));
 max_tracked_connections = math.max(1, math.floor(max_tracked_connections));
 max_errors = math.max(1, math.floor(max_errors));
 
@@ -144,6 +147,21 @@ local function next_sequence()
     return sequence;
 end
 
+-- Truncating in the middle of a multi-byte UTF-8 sequence would leave an invalid
+-- byte sequence in the document, which the endpoint may reject as a whole. Drop
+-- back over trailing continuation bytes (10xxxxxx) so only whole characters are kept.
+local function truncate_at_character_boundary(text, maximum_length)
+    local cut = maximum_length;
+    while cut > 0 do
+        local next_byte = text:byte(cut + 1);
+        if not next_byte or next_byte < 0x80 or next_byte >= 0xc0 then
+            break;
+        end
+        cut = cut - 1;
+    end
+    return text:sub(1, cut);
+end
+
 local function safe_string(value, maximum_length)
     if value == nil then
         return nil;
@@ -156,7 +174,7 @@ local function safe_string(value, maximum_length)
 
     local output = tostring(value);
     if maximum_length and #output > maximum_length then
-        return output:sub(1, maximum_length);
+        return truncate_at_character_boundary(output, maximum_length);
     end
     return output;
 end
@@ -1186,7 +1204,7 @@ local function handle_groupchat(event)
         sender_participant_id = participant_id;
         sender_endpoint_id = sender_endpoint_id;
         sender_display_name = display_name;
-        body = body;
+        body = safe_string(body, max_chat_message_length);
     });
 end
 

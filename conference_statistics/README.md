@@ -104,6 +104,10 @@ JID, sender participant and endpoint IDs, sender display name, and message
 body. Messages from the main room and breakout rooms are stored in the same
 `chat` array.
 
+A message body longer than `max_chat_message_length` is truncated at a UTF-8
+character boundary. Chat content dominates the memory this component holds, so
+this limit and `max_chat_messages` together bound the worst case per meeting.
+
 Polls are read from the final `room.polls` state when each room is destroyed.
 Each poll contains its creator, question, options, and the current named voters
 for every option. If a participant changes a vote, only the final state is
@@ -303,7 +307,8 @@ Component "cstatistics.meet.mydomain.com" "conference_statistics_component"
         return code == 408 or code == 429 or code >= 500
     end
 
-    max_chat_messages = 50000
+    max_chat_messages = 2000
+    max_chat_message_length = 4096
     max_tracked_connections = 10000
     max_errors = 1000
 ```
@@ -330,7 +335,8 @@ This is a standalone component. Do **not** add
 | `api_retry_delay` | no | `1` | Delay between attempts in seconds. |
 | `api_headers` | no | `{}` | Additional HTTP request headers. |
 | `api_should_retry_for_code` | no | 408, 429, 5xx | Function deciding which HTTP status codes are retryable. |
-| `max_chat_messages` | no | `50000` | Maximum collected public chat messages per meeting. |
+| `max_chat_messages` | no | `2000` | Maximum collected public chat messages per meeting. |
+| `max_chat_message_length` | no | `4096` | Maximum collected bytes per chat message body. |
 | `max_tracked_connections` | no | `10000` | Maximum accepted participant connection sessions per meeting. |
 | `max_errors` | no | `1000` | Maximum distinct error entries per meeting. |
 
@@ -405,4 +411,5 @@ component block loads it by the provider name `conference_statistics_component`.
 
 Safety limits should be selected according to the expected conference size and
 chat activity. Chat content will normally dominate memory use after participant
-timelines have been removed.
+timelines have been removed, so `max_chat_messages` multiplied by
+`max_chat_message_length` is the figure to size against.
