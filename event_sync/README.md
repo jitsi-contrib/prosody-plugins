@@ -183,6 +183,96 @@ If you correlate these events with Jibri recordings, note that
 meeting ID of the room that was recorded: `meeting_id` for a main room
 recording, `breakout_meeting_id` for a breakout room recording.
 
+The following examples show complete payloads for breakout room events. The
+`room_name`, `room_jid`, and `meeting_id` fields identify the main room, while
+`breakout_room_id` and `breakout_meeting_id` identify the breakout room.
+
+#### `muc-room-created`
+
+```json
+{
+  "event_name": "muc-room-created",
+  "room_name": "catchup",
+  "room_jid": "catchup@conference.meet.mydomain.com",
+  "meeting_id": "378f2f94-5e2b-4a31-9ae4-2c99d424fa98",
+  "is_breakout": true,
+  "breakout_room_id": "breakout-1",
+  "breakout_meeting_id": "b719fb04-64b3-40cd-bfea-0fa48017f132",
+  "created_at": 1625824000
+}
+```
+
+#### `muc-room-destroyed`
+
+```json
+{
+  "event_name": "muc-room-destroyed",
+  "room_name": "catchup",
+  "room_jid": "catchup@conference.meet.mydomain.com",
+  "meeting_id": "378f2f94-5e2b-4a31-9ae4-2c99d424fa98",
+  "is_breakout": true,
+  "breakout_room_id": "breakout-1",
+  "breakout_meeting_id": "b719fb04-64b3-40cd-bfea-0fa48017f132",
+  "created_at": 1625824000,
+  "destroyed_at": 1625824035,
+  "all_occupants": [
+    {
+      "name": "James Barrow",
+      "email": "j.barrow@domain.com",
+      "id": "00380324-a840-400d-880f-7ee0933b7556",
+      "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
+      "joined_at": 1625824005,
+      "left_at": 1625824035
+    }
+  ]
+}
+```
+
+#### `muc-occupant-joined`
+
+```json
+{
+  "event_name": "muc-occupant-joined",
+  "room_name": "catchup",
+  "room_jid": "catchup@conference.meet.mydomain.com",
+  "meeting_id": "378f2f94-5e2b-4a31-9ae4-2c99d424fa98",
+  "is_breakout": true,
+  "breakout_room_id": "breakout-1",
+  "breakout_meeting_id": "b719fb04-64b3-40cd-bfea-0fa48017f132",
+  "active_occupants_count": 2,
+  "occupant": {
+    "name": "James Barrow",
+    "email": "j.barrow@domain.com",
+    "id": "00380324-a840-400d-880f-7ee0933b7556",
+    "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
+    "joined_at": 1625824005
+  }
+}
+```
+
+#### `muc-occupant-left`
+
+```json
+{
+  "event_name": "muc-occupant-left",
+  "room_name": "catchup",
+  "room_jid": "catchup@conference.meet.mydomain.com",
+  "meeting_id": "378f2f94-5e2b-4a31-9ae4-2c99d424fa98",
+  "is_breakout": true,
+  "breakout_room_id": "breakout-1",
+  "breakout_meeting_id": "b719fb04-64b3-40cd-bfea-0fa48017f132",
+  "active_occupants_count": 1,
+  "occupant": {
+    "name": "James Barrow",
+    "email": "j.barrow@domain.com",
+    "id": "00380324-a840-400d-880f-7ee0933b7556",
+    "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
+    "joined_at": 1625824005,
+    "left_at": 1625824035
+  }
+}
+```
+
 When occupants join a breakout room, they leave the main room and enter the
 breakout room. You would therefore expect to see a `muc-occupant-left` event for
 the main room and a `muc-occupant-joined` event for the breakout room (as well
