@@ -19,6 +19,11 @@
 ---         return code == 408 or code == 429 or code >= 500
 ---     end
 ---
+---     -- Chat and poll content is not collected unless it is enabled here. Message,
+---     -- poll and vote counts are always reported.
+---     include_chat_content = false
+---     include_poll_content = false
+---
 ---     -- Optional safety limits. When a limit is reached, collection continues and
 ---     -- the resulting JSON contains a limit_reached entry in its errors array.
 ---     max_chat_messages = 2000
@@ -67,6 +72,8 @@ local api_timeout = tonumber(module:get_option("api_timeout", 20)) or 20;
 local api_retry_count = tonumber(module:get_option("api_retry_count", 3)) or 3;
 local api_retry_delay = tonumber(module:get_option("api_retry_delay", 1)) or 1;
 local configured_api_headers = module:get_option("api_headers", {});
+local include_chat_content = module:get_option_boolean("include_chat_content", false);
+local include_poll_content = module:get_option_boolean("include_poll_content", false);
 local max_chat_messages = tonumber(module:get_option("max_chat_messages", 2000)) or 2000;
 local max_chat_message_length = tonumber(module:get_option("max_chat_message_length", 4096)) or 4096;
 local max_tracked_connections = tonumber(module:get_option("max_tracked_connections", 10000)) or 10000;
@@ -405,7 +412,10 @@ local function new_meeting(meeting_id, main_room, started_at_ms)
         endpoint_to_participant = {};
         chat = {};
         seen_chat = {};
+        chat_message_count = 0;
         polls = {};
+        poll_count = 0;
+        poll_vote_count = 0;
         errors = {};
         error_index = {};
         errors_dropped = 0;
@@ -555,6 +565,9 @@ local function track_room(room, is_breakout)
         started_at_ms = started_at_ms;
         ended_at_ms = nil;
         destroyed = false;
+        chat_message_count = 0;
+        poll_count = 0;
+        poll_vote_count = 0;
         active_by_real_jid = {};
         active_by_nick = {};
     };
@@ -978,6 +991,8 @@ local function get_or_create_participant(meeting, participant_id, id_source, dis
             camera = new_aggregate_metric_state();
             screenshare = new_aggregate_metric_state();
             dominant_speaker_ms = 0;
+            chat_message_count = 0;
+            poll_vote_count = 0;
         };
         meeting.participants_by_id[participant_id] = participant;
     else
@@ -1143,7 +1158,7 @@ local function handle_groupchat(event)
         return;
     end
 
-    if #meeting.chat >= max_chat_messages then
+    if meeting.chat_message_count >= max_chat_messages then
         append_error(
             meeting,
             "limit_reached",
@@ -1179,6 +1194,21 @@ local function handle_groupchat(event)
         meeting.seen_chat[deduplication_key] = true;
     end
 
+    local participant_id = connection and connection.participant_id
+        or (sender_endpoint_id and meeting.endpoint_to_participant[sender_endpoint_id])
+        or sender_endpoint_id;
+    local sender = participant_id and meeting.participants_by_id[participant_id];
+
+    meeting.chat_message_count = meeting.chat_message_count + 1;
+    room_record.chat_message_count = room_record.chat_message_count + 1;
+    if sender then
+        sender.chat_message_count = sender.chat_message_count + 1;
+    end
+
+    if not include_chat_content then
+        return;
+    end
+
     local message_id = stanza_id or table.concat({
         meeting.meeting_id;
         "message";
@@ -1188,12 +1218,8 @@ local function handle_groupchat(event)
         or get_presence_child_text(stanza, "display-name", DISPLAY_NAME_NS)
         or get_presence_child_text(stanza, "display-name")
         or get_presence_child_text(stanza, "nick", NICK_NS);
-    local participant_id = connection and connection.participant_id
-        or (sender_endpoint_id and meeting.endpoint_to_participant[sender_endpoint_id])
-        or sender_endpoint_id;
-    if (not display_name or display_name == "") and participant_id then
-        local participant = meeting.participants_by_id[participant_id];
-        display_name = participant and participant.display_name or nil;
+    if (not display_name or display_name == "") and sender then
+        display_name = sender.display_name;
     end
 
     table.insert(meeting.chat, {
@@ -1206,6 +1232,29 @@ local function handle_groupchat(event)
         sender_display_name = display_name;
         body = safe_string(body, max_chat_message_length);
     });
+end
+
+local function count_poll_state(meeting, room_record, poll)
+    meeting.poll_count = meeting.poll_count + 1;
+    room_record.poll_count = room_record.poll_count + 1;
+
+    for _, answer in ipairs(type(poll.answers) == "table" and poll.answers or {}) do
+        if type(answer) == "table" and type(answer.voters) == "table" then
+            for _, voter in ipairs(answer.voters) do
+                if type(voter) == "table" then
+                    meeting.poll_vote_count = meeting.poll_vote_count + 1;
+                    room_record.poll_vote_count = room_record.poll_vote_count + 1;
+
+                    local voter_id = safe_string(voter.id, 512);
+                    local participant_id = voter_id and meeting.endpoint_to_participant[voter_id];
+                    local participant = participant_id and meeting.participants_by_id[participant_id];
+                    if participant then
+                        participant.poll_vote_count = participant.poll_vote_count + 1;
+                    end
+                end
+            end
+        end
+    end
 end
 
 local function snapshot_polls(meeting, room, room_record)
@@ -1238,41 +1287,46 @@ local function snapshot_polls(meeting, room, room_record)
                 "Ignoring a non-object poll",
                 { room_jid = room_record.jid });
         else
-            local options = {};
-            for option_index, answer in ipairs(type(poll.answers) == "table" and poll.answers or {}) do
-                local voters = {};
-                if type(answer) == "table" and type(answer.voters) == "table" then
-                    for _, voter in ipairs(answer.voters) do
-                        if type(voter) == "table" then
-                            local voter_id = safe_string(voter.id, 512);
-                            table.insert(voters, {
-                                voter_id = voter_id;
-                                participant_id = voter_id and meeting.endpoint_to_participant[voter_id] or nil;
-                                name = safe_string(voter.name, 512);
-                            });
+            count_poll_state(meeting, room_record, poll);
+
+            if include_poll_content then
+                local options = {};
+                for option_index, answer in ipairs(type(poll.answers) == "table" and poll.answers or {}) do
+                    local voters = {};
+                    if type(answer) == "table" and type(answer.voters) == "table" then
+                        for _, voter in ipairs(answer.voters) do
+                            if type(voter) == "table" then
+                                local voter_id = safe_string(voter.id, 512);
+                                table.insert(voters, {
+                                    voter_id = voter_id;
+                                    participant_id = voter_id
+                                        and meeting.endpoint_to_participant[voter_id] or nil;
+                                    name = safe_string(voter.name, 512);
+                                });
+                            end
                         end
                     end
+
+                    table.insert(options, {
+                        option_index = option_index;
+                        text = type(answer) == "table" and safe_string(answer.name, 4096) or nil;
+                        voters = #voters == 0 and EMPTY_ARRAY or voters;
+                    });
                 end
 
-                table.insert(options, {
-                    option_index = option_index;
-                    text = type(answer) == "table" and safe_string(answer.name, 4096) or nil;
-                    voters = #voters == 0 and EMPTY_ARRAY or voters;
+                local creator_endpoint_id = safe_string(poll.senderId, 512);
+                table.insert(meeting.polls, {
+                    poll_id = safe_string(poll.pollId, 512) or tostring(poll_index);
+                    room_id = room_record.room_id;
+                    room_jid = room_record.jid;
+                    creator_endpoint_id = creator_endpoint_id;
+                    creator_participant_id = creator_endpoint_id
+                        and meeting.endpoint_to_participant[creator_endpoint_id] or nil;
+                    creator_name = safe_string(poll.senderName, 512);
+                    question = safe_string(poll.question, 16384);
+                    options = #options == 0 and EMPTY_ARRAY or options;
                 });
             end
-
-            local creator_endpoint_id = safe_string(poll.senderId, 512);
-            table.insert(meeting.polls, {
-                poll_id = safe_string(poll.pollId, 512) or tostring(poll_index);
-                room_id = room_record.room_id;
-                room_jid = room_record.jid;
-                creator_endpoint_id = creator_endpoint_id;
-                creator_participant_id = creator_endpoint_id
-                    and meeting.endpoint_to_participant[creator_endpoint_id] or nil;
-                creator_name = safe_string(poll.senderName, 512);
-                question = safe_string(poll.question, 16384);
-                options = #options == 0 and EMPTY_ARRAY or options;
-            });
         end
     end
 end
@@ -1312,6 +1366,8 @@ local function build_participant_output(participant, timestamp)
         screenshare_enabled_ms = aggregate_metric_total_ms(participant.screenshare, timestamp);
         screenshare_start_count = participant.screenshare.enable_count;
         screenshare_stop_count = participant.screenshare.disable_count;
+        chat_message_count = participant.chat_message_count;
+        poll_vote_count = participant.poll_vote_count;
     };
 end
 
@@ -1342,6 +1398,9 @@ local function build_payload(meeting)
             started_at_ms = room_record.started_at_ms;
             ended_at_ms = room_ended_at_ms;
             duration_ms = math.max(0, room_ended_at_ms - room_record.started_at_ms);
+            chat_message_count = room_record.chat_message_count;
+            poll_count = room_record.poll_count;
+            poll_vote_count = room_record.poll_vote_count;
         };
         if room_record.is_breakout then
             room_output.breakout_meeting_id = room_record.breakout_meeting_id;
@@ -1387,6 +1446,9 @@ local function build_payload(meeting)
             started_at_ms = meeting.started_at_ms;
             ended_at_ms = ended_at_ms;
             duration_ms = math.max(0, ended_at_ms - meeting.started_at_ms);
+            chat_message_count = meeting.chat_message_count;
+            poll_count = meeting.poll_count;
+            poll_vote_count = meeting.poll_vote_count;
         };
         rooms = make_json_array(rooms);
         participants = make_json_array(participants);

@@ -16,8 +16,9 @@ The component associates breakout rooms with their main room and collects:
 - dominant speaker time from Jitsi `speakerstats`;
 - camera enabled time and enable/disable counts;
 - screen sharing time and start/stop counts;
-- public group chat messages;
-- final poll state, including named voters;
+- public chat message, poll and vote counts;
+- public group chat messages (optional, off by default);
+- final poll state including named voters (optional, off by default);
 - collection and delivery errors.
 
 All timestamps and durations are expressed as Unix time in milliseconds.
@@ -85,7 +86,9 @@ The participant object contains compact totals and transition counters:
   "camera_disable_count": 2,
   "screenshare_enabled_ms": 300000,
   "screenshare_start_count": 1,
-  "screenshare_stop_count": 1
+  "screenshare_stop_count": 1,
+  "chat_message_count": 7,
+  "poll_vote_count": 1
 }
 ```
 
@@ -98,6 +101,25 @@ Only public MUC `groupchat` messages are collected. Private messages are not
 captured.
 
 ## Chat and polls
+
+Chat and poll **content** is not collected unless it is explicitly enabled.
+Counts are always reported: `chat_message_count` on the conference, on each
+room and on each participant and `poll_count` / `poll_vote_count` on the
+conference and each room plus `poll_vote_count` on each participant. So a
+deployment can measure chat and poll activity without keeping any message
+body, question, option text or voter identity.
+
+Set `include_chat_content = true` to collect the `chat` array and
+`include_poll_content = true` to collect the `polls` array. Both default to
+`false`. When a section is disabled its array is present but empty.
+
+`max_chat_messages` bounds the message count as well as the stored bodies, so
+counting stops once it is reached and a `limit_reached` error is recorded. Poll
+and vote counts are bounded by Jitsi's own limit of 128 polls per room.
+
+Content is user-supplied conference material rather than a statistic and the
+resulting document is a durable off-box copy of it. Enabling either option
+makes the endpoint operator responsible for its retention and deletion.
 
 Each public chat entry contains the stanza/message ID, timestamp, room ID and
 JID, sender participant and endpoint IDs, sender display name, and message
@@ -155,7 +177,10 @@ Example of a complete successful document:
     "main_room_jid": "catchup@conference.meet.mydomain.com",
     "started_at_ms": 1787135041199,
     "ended_at_ms": 1787138161199,
-    "duration_ms": 3120000
+    "duration_ms": 3120000,
+    "chat_message_count": 12,
+    "poll_count": 1,
+    "poll_vote_count": 3
   },
   "rooms": [
     {
@@ -164,7 +189,10 @@ Example of a complete successful document:
       "is_breakout": false,
       "started_at_ms": 1787135041199,
       "ended_at_ms": 1787138161199,
-      "duration_ms": 3120000
+      "duration_ms": 3120000,
+      "chat_message_count": 9,
+      "poll_count": 1,
+      "poll_vote_count": 3
     },
     {
       "room_id": "8fcfc934-76d8-40ce-8ef8-bc5d257a164e",
@@ -173,7 +201,10 @@ Example of a complete successful document:
       "breakout_meeting_id": "b719fb04-64b3-40cd-bfea-0fa48017f132",
       "started_at_ms": 1787136000000,
       "ended_at_ms": 1787136600000,
-      "duration_ms": 600000
+      "duration_ms": 600000,
+      "chat_message_count": 3,
+      "poll_count": 0,
+      "poll_vote_count": 0
     }
   ],
   "participants": [
@@ -197,7 +228,9 @@ Example of a complete successful document:
       "camera_disable_count": 2,
       "screenshare_enabled_ms": 300000,
       "screenshare_start_count": 1,
-      "screenshare_stop_count": 1
+      "screenshare_stop_count": 1,
+      "chat_message_count": 7,
+      "poll_vote_count": 1
     }
   ],
   "chat": [
@@ -307,6 +340,9 @@ Component "cstatistics.meet.mydomain.com" "conference_statistics_component"
         return code == 408 or code == 429 or code >= 500
     end
 
+    include_chat_content = false
+    include_poll_content = false
+
     max_chat_messages = 2000
     max_chat_message_length = 4096
     max_tracked_connections = 10000
@@ -335,6 +371,8 @@ This is a standalone component. Do **not** add
 | `api_retry_delay` | no | `1` | Delay between attempts in seconds. |
 | `api_headers` | no | `{}` | Additional HTTP request headers. |
 | `api_should_retry_for_code` | no | 408, 429, 5xx | Function deciding which HTTP status codes are retryable. |
+| `include_chat_content` | no | `false` | Collect chat message bodies. Counts are reported either way. |
+| `include_poll_content` | no | `false` | Collect poll questions, options and named voters. Counts are reported either way. |
 | `max_chat_messages` | no | `2000` | Maximum collected public chat messages per meeting. |
 | `max_chat_message_length` | no | `4096` | Maximum collected bytes per chat message body. |
 | `max_tracked_connections` | no | `10000` | Maximum accepted participant connection sessions per meeting. |
