@@ -26,6 +26,8 @@ JSON payload containing:
 - meeting_id (Prosody meeting ID, when available)
 - is_breakout
 - breakout_room_id (only if is_breakout is true)
+- breakout_meeting_id (Prosody meeting ID of the breakout room, only if
+  is_breakout is true)
 - created_at
 
 Example:
@@ -52,6 +54,8 @@ with JSON payload containing:
 - meeting_id (Prosody meeting ID, when available)
 - is_breakout
 - breakout_room_id (only if is_breakout is true)
+- breakout_meeting_id (Prosody meeting ID of the breakout room, only if
+  is_breakout is true)
 - created_at
 - destroyed_at
 - all_occupants (list of all occupants that has joined since room created)
@@ -91,6 +95,8 @@ with JSON payload containing:
 - meeting_id (Prosody meeting ID, when available)
 - is_breakout
 - breakout_room_id (only if is_breakout is true)
+- breakout_meeting_id (Prosody meeting ID of the breakout room, only if
+  is_breakout is true)
 - active_occupants_count (current number of active occupants, including the one
   that just joined)
 - occupant
@@ -131,6 +137,8 @@ with JSON payload containing:
 - meeting_id (Prosody meeting ID, when available)
 - is_breakout
 - breakout_room_id (only if is_breakout is true)
+- breakout_meeting_id (Prosody meeting ID of the breakout room, only if
+  is_breakout is true)
 - active_occupants_count (current number of active occupants, excluding the one
   that just left)
 - occupant
@@ -166,8 +174,14 @@ Example:
 
 For breakout room events, `is_breakout` will be `true` and `breakout_room_id`
 will hold the identifier of the breakout room. The `room_name` and `room_jid`
-will still reference the main room. The `meeting_id` will also reference the
-main room so all events for the logical conference use the same identifier.
+will still reference the main room and so will `meeting_id`. So, all events for
+the logical conference share the same identifier. The breakout room has a
+meeting ID of its own, reported separately as `breakout_meeting_id`.
+
+If you correlate these events with Jibri recordings, note that
+`conference_details.session_id` in the recording's `metadata.json` holds the
+meeting ID of the room that was recorded: `meeting_id` for a main room
+recording, `breakout_meeting_id` for a breakout room recording.
 
 When occupants join a breakout room, they leave the main room and enter the
 breakout room. You would therefore expect to see a `muc-occupant-left` event for
