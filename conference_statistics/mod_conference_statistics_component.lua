@@ -124,7 +124,10 @@ for key, value in pairs(configured_api_headers) do
     end
 end
 
-local meetings = {};
+-- meetingId can be replaced by Jicofo after room creation, so it is an alias,
+-- not the primary in-memory identity of a logical conference.
+local meetings_by_id = {};
+local meetings_by_main_room_jid = {};
 local room_to_meeting = setmetatable({}, { __mode = "k" });
 local room_to_record = setmetatable({}, { __mode = "k" });
 local pending_component_errors = {};
@@ -251,9 +254,13 @@ local function find_meeting_for_event(event)
         return meeting;
     end
 
+    if room and room.jid and meetings_by_main_room_jid[room.jid] then
+        return meetings_by_main_room_jid[room.jid];
+    end
+
     local meeting_id = room and room._data and room._data.meetingId;
     if meeting_id then
-        return meetings[tostring(meeting_id)];
+        return meetings_by_id[tostring(meeting_id)];
     end
     return nil;
 end
@@ -305,11 +312,73 @@ local function isolated_handler(stage, handler)
     end;
 end
 
-local function new_meeting(meeting_id, started_at_ms)
+local function register_meeting_id(meeting, meeting_id)
+    local normalized_id = safe_string(meeting_id, 512);
+    if not normalized_id or normalized_id == "" then
+        return false;
+    end
+
+    local existing = meetings_by_id[normalized_id];
+    if existing and existing ~= meeting then
+        append_error(
+            meeting,
+            "meeting_id_collision",
+            "room_identity",
+            "meetingId is already associated with another active conference",
+            { meeting_id = normalized_id; room_jid = meeting.main_room_jid });
+        return false;
+    end
+
+    meetings_by_id[normalized_id] = meeting;
+    meeting.meeting_id_aliases[normalized_id] = true;
+    meeting.meeting_id = normalized_id;
+    return true;
+end
+
+local function register_main_room(meeting, main_room)
+    if not main_room or not main_room.jid then
+        return false;
+    end
+
+    if meeting.main_room_jid and meeting.main_room_jid ~= main_room.jid then
+        append_error(
+            meeting,
+            "main_room_mismatch",
+            "room_identity",
+            "A conference cannot be associated with two different main room JIDs",
+            { room_jid = main_room.jid; expected_room_jid = meeting.main_room_jid });
+        return false;
+    end
+
+    local existing = meetings_by_main_room_jid[main_room.jid];
+    if existing and existing ~= meeting then
+        append_error(
+            meeting,
+            "main_room_collision",
+            "room_identity",
+            "Main room JID is already associated with another active conference",
+            { room_jid = main_room.jid });
+        return false;
+    end
+
+    meetings_by_main_room_jid[main_room.jid] = meeting;
+    meeting.main_room = main_room;
+    meeting.main_room_jid = main_room.jid;
+    return true;
+end
+
+local function read_room_meeting_id(room)
+    local meeting_id = room and room._data and room._data.meetingId;
+    return safe_string(meeting_id, 512);
+end
+
+local function new_meeting(meeting_id, main_room, started_at_ms)
     local meeting = {
-        meeting_id = meeting_id;
+        meeting_id = nil;
+        meeting_id_aliases = {};
         started_at_ms = started_at_ms;
         ended_at_ms = nil;
+        main_room = nil;
         main_room_jid = nil;
         main_room_ended = false;
         active_room_count = 0;
@@ -332,13 +401,18 @@ local function new_meeting(meeting_id, started_at_ms)
     end
     pending_component_errors = {};
 
-    meetings[meeting_id] = meeting;
+    register_main_room(meeting, main_room);
+    register_meeting_id(meeting, meeting_id);
     return meeting;
 end
 
 local function get_main_room_for_breakout(breakout_room)
     if breakout_room.main_room then
         return breakout_room.main_room;
+    end
+
+    if breakout_room._data and breakout_room._data.main_room then
+        return breakout_room._data.main_room;
     end
 
     if not main_muc_service then
@@ -348,25 +422,43 @@ local function get_main_room_for_breakout(breakout_room)
     for room in main_muc_service.each_room() do
         if room._data and room._data.breakout_rooms
             and room._data.breakout_rooms[breakout_room.jid] then
+            -- Cache outside _data so room persistence never serializes an object graph.
+            breakout_room.main_room = room;
             return room;
         end
     end
     return nil;
 end
 
-local function resolve_meeting_id(room, is_breakout)
+local function resolve_meeting_context(room, is_breakout)
     if not is_breakout then
-        local meeting_id = room._data and room._data.meetingId;
-        return meeting_id and tostring(meeting_id) or nil, room;
-    end
-
-    if room.speakerStats and room.speakerStats.sessionId then
-        return tostring(room.speakerStats.sessionId), get_main_room_for_breakout(room);
+        return room, read_room_meeting_id(room);
     end
 
     local main_room = get_main_room_for_breakout(room);
-    local meeting_id = main_room and main_room._data and main_room._data.meetingId;
-    return meeting_id and tostring(meeting_id) or nil, main_room;
+    local meeting_id = read_room_meeting_id(main_room);
+    if meeting_id then
+        return main_room, meeting_id;
+    end
+
+    -- Jitsi speakerstats sets sessionId on a breakout room to the main room's
+    -- meetingId. It is useful only as a compatibility fallback because it can
+    -- have been captured before Jicofo replaced the main room meetingId.
+    local speakerstats_meeting_id = room.speakerStats and room.speakerStats.sessionId;
+    return main_room, safe_string(speakerstats_meeting_id, 512);
+end
+
+local function refresh_room_identity(meeting, room_record, room)
+    if room_record.is_breakout then
+        local breakout_meeting_id = read_room_meeting_id(room);
+        if breakout_meeting_id and breakout_meeting_id ~= "" then
+            room_record.breakout_meeting_id = breakout_meeting_id;
+        end
+        return;
+    end
+
+    register_main_room(meeting, room);
+    register_meeting_id(meeting, read_room_meeting_id(room));
 end
 
 local function track_room(room, is_breakout)
@@ -380,7 +472,7 @@ local function track_room(room, is_breakout)
     end
 
     local started_at_ms = now_ms();
-    local meeting_id, main_room = resolve_meeting_id(room, is_breakout);
+    local main_room, meeting_id = resolve_meeting_context(room, is_breakout);
     if not meeting_id then
         append_pending_error(
             "meeting_id_unavailable",
@@ -391,9 +483,33 @@ local function track_room(room, is_breakout)
         return nil, nil;
     end
 
-    local meeting = meetings[meeting_id];
+    local main_room_jid = main_room and main_room.jid;
+    local meeting_by_main_room = main_room_jid and meetings_by_main_room_jid[main_room_jid];
+    local meeting_by_id = meetings_by_id[meeting_id];
+    if meeting_by_main_room and meeting_by_id and meeting_by_main_room ~= meeting_by_id then
+        append_error(
+            meeting_by_main_room,
+            "meeting_identity_conflict",
+            "room_identity",
+            "Main room JID and meetingId resolve to different active conferences",
+            { room_jid = main_room_jid; meeting_id = meeting_id });
+        return nil, nil;
+    end
+
+    local meeting = meeting_by_main_room or meeting_by_id;
+    if meeting and main_room_jid and meeting.main_room_jid
+        and meeting.main_room_jid ~= main_room_jid then
+        append_error(
+            meeting,
+            "main_room_mismatch",
+            "room_identity",
+            "meetingId resolved to a conference with a different main room JID",
+            { room_jid = main_room_jid; expected_room_jid = meeting.main_room_jid });
+        return nil, nil;
+    end
+
     if not meeting then
-        meeting = new_meeting(meeting_id, started_at_ms);
+        meeting = new_meeting(meeting_id, main_room, started_at_ms);
     elseif meeting.finalized then
         append_error(
             meeting,
@@ -404,30 +520,35 @@ local function track_room(room, is_breakout)
         return nil, nil;
     end
 
+    if main_room and not register_main_room(meeting, main_room) then
+        return nil, nil;
+    end
+    if main_room then
+        register_meeting_id(meeting, read_room_meeting_id(main_room) or meeting_id);
+    elseif not meeting.meeting_id then
+        register_meeting_id(meeting, meeting_id);
+    end
+
     local room_record = {
         jid = room.jid;
         room_id = jid.node(room.jid) or room.jid;
         is_breakout = is_breakout;
+        breakout_meeting_id = nil;
         started_at_ms = started_at_ms;
         ended_at_ms = nil;
         destroyed = false;
         active_by_real_jid = {};
         active_by_nick = {};
     };
+    refresh_room_identity(meeting, room_record, room);
 
     meeting.rooms_by_jid[room.jid] = room_record;
     meeting.active_room_count = meeting.active_room_count + 1;
     meeting.started_at_ms = math.min(meeting.started_at_ms, started_at_ms);
 
-    if not is_breakout then
-        meeting.main_room_jid = room.jid;
-    elseif not meeting.main_room_jid and main_room then
-        meeting.main_room_jid = main_room.jid;
-    end
-
     room_to_meeting[room] = meeting;
     room_to_record[room] = room_record;
-    module:log("debug", "Tracking room %s for meeting %s", room.jid, meeting_id);
+    module:log("debug", "Tracking room %s for meeting %s", room.jid, meeting.meeting_id);
     return meeting, room_record;
 end
 
@@ -1196,14 +1317,26 @@ local function build_payload(meeting)
         local room_ended_at_ms = room_record.ended_at_ms
             or meeting.ended_at_ms
             or room_record.started_at_ms;
-        table.insert(rooms, {
+        local room_output = {
             room_id = room_record.room_id;
             jid = room_record.jid;
             is_breakout = room_record.is_breakout;
             started_at_ms = room_record.started_at_ms;
             ended_at_ms = room_ended_at_ms;
             duration_ms = math.max(0, room_ended_at_ms - room_record.started_at_ms);
-        });
+        };
+        if room_record.is_breakout then
+            room_output.breakout_meeting_id = room_record.breakout_meeting_id;
+            if not room_record.breakout_meeting_id then
+                append_error(
+                    meeting,
+                    "breakout_meeting_id_unavailable",
+                    "room_identity",
+                    "Unable to resolve the breakout room meetingId",
+                    { room_jid = room_record.jid });
+            end
+        end
+        table.insert(rooms, room_output);
     end
     table.sort(rooms, function(left, right)
         if left.started_at_ms == right.started_at_ms then
@@ -1250,9 +1383,15 @@ local function finish_delivery(meeting, success)
         return;
     end
     meeting.delivery_finished = true;
-    if meetings[meeting.meeting_id] == meeting then
-        meetings[meeting.meeting_id] = nil;
+    for meeting_id in pairs(meeting.meeting_id_aliases) do
+        if meetings_by_id[meeting_id] == meeting then
+            meetings_by_id[meeting_id] = nil;
+        end
     end
+    if meeting.main_room_jid and meetings_by_main_room_jid[meeting.main_room_jid] == meeting then
+        meetings_by_main_room_jid[meeting.main_room_jid] = nil;
+    end
+    meeting.main_room = nil;
 
     if success then
         module:log("info", "Conference statistics delivered for meeting %s", meeting.meeting_id);
@@ -1470,6 +1609,9 @@ local function finalize_meeting_if_ready(meeting)
         return;
     end
 
+    if meeting.main_room then
+        register_meeting_id(meeting, read_room_meeting_id(meeting.main_room));
+    end
     meeting.finalized = true;
     meeting.ended_at_ms = meeting.ended_at_ms or now_ms();
     module:log("info", "Finalizing conference statistics for meeting %s", meeting.meeting_id);
@@ -1502,12 +1644,16 @@ local function handle_room_destroyed(event)
     end
 
     snapshot_polls(meeting, room, room_record);
+    refresh_room_identity(meeting, room_record, room);
     room_record.destroyed = true;
     room_record.ended_at_ms = destroyed_at_ms;
     meeting.ended_at_ms = math.max(meeting.ended_at_ms or destroyed_at_ms, destroyed_at_ms);
     meeting.active_room_count = math.max(0, meeting.active_room_count - 1);
     if not room_record.is_breakout then
         meeting.main_room_ended = true;
+        -- The final main meetingId was captured above; do not retain the whole
+        -- destroyed MUC room object while breakout rooms finish or HTTP retries run.
+        meeting.main_room = nil;
     end
 
     room_to_meeting[room] = nil;

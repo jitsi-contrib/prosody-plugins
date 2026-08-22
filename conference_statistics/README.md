@@ -7,8 +7,7 @@ rooms have been destroyed.
 It is installed as a standalone Prosody component. It does not modify Jicofo,
 JVB, Jibri, or the existing `event_sync` component.
 
-The component groups main and breakout rooms by the Jitsi meeting ID and
-collects:
+The component associates breakout rooms with their main room and collects:
 
 - participant presence time;
 - participant rejoin count;
@@ -22,6 +21,25 @@ collects:
 - collection and delivery errors.
 
 All timestamps and durations are expressed as Unix time in milliseconds.
+
+## Main and breakout room identity
+
+One document represents one logical conference. Its root `meeting_id` is the
+final Jitsi meeting ID of the main room and is also used as the HTTP
+`Idempotency-Key`. Participant metrics are conference-wide totals across the
+main room and all of its breakout rooms; they are not split per room.
+
+Each `rooms` entry has a `room_id` derived from the node of its XMPP JID. For a
+breakout room, this is the same value that `event_sync` reports as
+`breakout_room_id`. A breakout entry also contains `breakout_meeting_id`, the
+breakout room's own `room._data.meetingId`. Chat and poll entries refer to their
+room through `room_id` and `room_jid`.
+
+Jicofo may replace `room._data.meetingId` after room creation. The component
+therefore groups rooms in memory by the stable main-room relationship and reads
+the final main and breakout meeting IDs as late as possible. It accepts the
+main-room links used by current Jitsi modules and falls back to
+`speakerStats.sessionId` only when the main meeting ID cannot be read directly.
 
 ## Participant identity
 
@@ -98,14 +116,14 @@ The component sends the final document as a raw JSON request body:
 ```http
 POST <api_prefix>/events/conference/statistics
 Content-Type: application/json
-Idempotency-Key: <meetingId>
+Idempotency-Key: <main-room-meetingId>
 ```
 
 The endpoint is expected to process the request idempotently. A typical storage
 key is:
 
 ```text
-conferences/<meetingId>.json
+conferences/<main-room-meetingId>.json
 ```
 
 The component does not write to S3 directly. An HTTP service can validate the
@@ -145,9 +163,10 @@ Example of a complete successful document:
       "duration_ms": 3120000
     },
     {
-      "room_id": "breakout-1",
-      "jid": "breakout-1@breakout.meet.mydomain.com",
+      "room_id": "8fcfc934-76d8-40ce-8ef8-bc5d257a164e",
+      "jid": "8fcfc934-76d8-40ce-8ef8-bc5d257a164e@breakout.meet.mydomain.com",
       "is_breakout": true,
+      "breakout_meeting_id": "b719fb04-64b3-40cd-bfea-0fa48017f132",
       "started_at_ms": 1787136000000,
       "ended_at_ms": 1787136600000,
       "duration_ms": 600000
@@ -181,8 +200,8 @@ Example of a complete successful document:
     {
       "message_id": "message-42",
       "sent_at_ms": 1787136200000,
-      "room_id": "breakout-1",
-      "room_jid": "breakout-1@breakout.meet.mydomain.com",
+      "room_id": "8fcfc934-76d8-40ce-8ef8-bc5d257a164e",
+      "room_jid": "8fcfc934-76d8-40ce-8ef8-bc5d257a164e@breakout.meet.mydomain.com",
       "sender_participant_id": "user-123",
       "sender_endpoint_id": "endpoint-2",
       "sender_display_name": "Example User",
