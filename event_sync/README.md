@@ -23,6 +23,7 @@ JSON payload containing:
 - event_name
 - room_name
 - room_jid
+- meeting_id (Prosody meeting ID, when available)
 - is_breakout
 - breakout_room_id (only if is_breakout is true)
 - created_at
@@ -34,6 +35,7 @@ Example:
   "event_name": "muc-room-created",
   "room_name": "catchup",
   "room_jid": "catchup@conference.meet.mydomain.com",
+  "meeting_id": "378f2f94-5e2b-4a31-9ae4-2c99d424fa98",
   "is_breakout": false,
   "created_at": 1625823996
 }
@@ -47,6 +49,7 @@ with JSON payload containing:
 - event_name
 - room_name
 - room_jid
+- meeting_id (Prosody meeting ID, when available)
 - is_breakout
 - breakout_room_id (only if is_breakout is true)
 - created_at
@@ -60,6 +63,7 @@ Example:
   "event_name": "muc-room-destroyed",
   "room_name": "catchup",
   "room_jid": "catchup@conference.meet.mydomain.com",
+  "meeting_id": "378f2f94-5e2b-4a31-9ae4-2c99d424fa98",
   "is_breakout": false,
   "created_at": 1625823996,
   "destroyed_at": 1625824035,
@@ -84,6 +88,7 @@ with JSON payload containing:
 - event_name
 - room_name
 - room_jid
+- meeting_id (Prosody meeting ID, when available)
 - is_breakout
 - breakout_room_id (only if is_breakout is true)
 - active_occupants_count (current number of active occupants, including the one
@@ -102,6 +107,7 @@ Example:
   "event_name": "muc-occupant-joined",
   "room_name": "catchup",
   "room_jid": "catchup@conference.meet.mydomain.com",
+  "meeting_id": "378f2f94-5e2b-4a31-9ae4-2c99d424fa98",
   "is_breakout": false,
   "active_occupants_count": 4,
   "occupant": {
@@ -122,6 +128,7 @@ with JSON payload containing:
 - event_name
 - room_name
 - room_jid
+- meeting_id (Prosody meeting ID, when available)
 - is_breakout
 - breakout_room_id (only if is_breakout is true)
 - active_occupants_count (current number of active occupants, excluding the one
@@ -141,6 +148,7 @@ Example:
   "event_name": "muc-occupant-left",
   "room_name": "catchup",
   "room_jid": "catchup@conference.meet.mydomain.com",
+  "meeting_id": "378f2f94-5e2b-4a31-9ae4-2c99d424fa98",
   "is_breakout": false,
   "active_occupants_count": 3,
   "occupant": {
@@ -157,8 +165,9 @@ Example:
 ### Events from breakout rooms
 
 For breakout room events, `is_breakout` will be `true` and `breakout_room_id`
-will hold the identifier of the breakout room. The `room_name` and `roome_id`
-will still reference the main room.
+will hold the identifier of the breakout room. The `room_name` and `room_jid`
+will still reference the main room. The `meeting_id` will also reference the
+main room so all events for the logical conference use the same identifier.
 
 When occupants join a breakout room, they leave the main room and enter the
 breakout room. You would therefore expect to see a `muc-occupant-left` event for

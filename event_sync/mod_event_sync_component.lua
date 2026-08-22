@@ -250,6 +250,13 @@ function update_with_room_attributes(payload, room)
             payload[k] = v;
         end
     end
+
+    -- Breakout room payloads use the main room's name and JID, so use its
+    -- meeting ID as well.
+    local meeting_room = room._data and room._data.main_room or room;
+    if meeting_room._data and meeting_room._data.meetingId then
+        payload.meeting_id = meeting_room._data.meetingId;
+    end
 end
 
 
