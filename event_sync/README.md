@@ -30,7 +30,7 @@ JSON payload containing:
   is_breakout is true)
 - created_at
 
-Example:
+Main room example:
 
 ```json
 {
@@ -40,6 +40,21 @@ Example:
   "meeting_id": "378f2f94-5e2b-4a31-9ae4-2c99d424fa98",
   "is_breakout": false,
   "created_at": 1625823996
+}
+```
+
+Breakout room example:
+
+```json
+{
+  "event_name": "muc-room-created",
+  "room_name": "catchup",
+  "room_jid": "catchup@conference.meet.mydomain.com",
+  "meeting_id": "378f2f94-5e2b-4a31-9ae4-2c99d424fa98",
+  "is_breakout": true,
+  "breakout_room_id": "breakout-1",
+  "breakout_meeting_id": "b719fb04-64b3-40cd-bfea-0fa48017f132",
+  "created_at": 1625824000
 }
 ```
 
@@ -60,7 +75,7 @@ with JSON payload containing:
 - destroyed_at
 - all_occupants (list of all occupants that has joined since room created)
 
-Example:
+Main room example:
 
 ```json
 {
@@ -78,6 +93,32 @@ Example:
       "id": "00380324-a840-400d-880f-7ee0933b7556",
       "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
       "joined_at": 1625823996,
+      "left_at": 1625824035
+    }
+  ]
+}
+```
+
+Breakout room example:
+
+```json
+{
+  "event_name": "muc-room-destroyed",
+  "room_name": "catchup",
+  "room_jid": "catchup@conference.meet.mydomain.com",
+  "meeting_id": "378f2f94-5e2b-4a31-9ae4-2c99d424fa98",
+  "is_breakout": true,
+  "breakout_room_id": "breakout-1",
+  "breakout_meeting_id": "b719fb04-64b3-40cd-bfea-0fa48017f132",
+  "created_at": 1625824000,
+  "destroyed_at": 1625824035,
+  "all_occupants": [
+    {
+      "name": "James Barrow",
+      "email": "j.barrow@domain.com",
+      "id": "00380324-a840-400d-880f-7ee0933b7556",
+      "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
+      "joined_at": 1625824005,
       "left_at": 1625824035
     }
   ]
@@ -106,7 +147,7 @@ with JSON payload containing:
   - email (from JWT user context; or from MUC presence if `include_presence_fallback` is enabled)
   - id (if JWT token auth used. Taken from user context.)
 
-Example:
+Main room example:
 
 ```json
 {
@@ -122,6 +163,28 @@ Example:
     "id": "00380324-a840-400d-880f-7ee0933b7556",
     "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
     "joined_at": 1625823996
+  }
+}
+```
+
+Breakout room example:
+
+```json
+{
+  "event_name": "muc-occupant-joined",
+  "room_name": "catchup",
+  "room_jid": "catchup@conference.meet.mydomain.com",
+  "meeting_id": "378f2f94-5e2b-4a31-9ae4-2c99d424fa98",
+  "is_breakout": true,
+  "breakout_room_id": "breakout-1",
+  "breakout_meeting_id": "b719fb04-64b3-40cd-bfea-0fa48017f132",
+  "active_occupants_count": 2,
+  "occupant": {
+    "name": "James Barrow",
+    "email": "j.barrow@domain.com",
+    "id": "00380324-a840-400d-880f-7ee0933b7556",
+    "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
+    "joined_at": 1625824005
   }
 }
 ```
@@ -149,7 +212,7 @@ with JSON payload containing:
   - email (from JWT user context; or from MUC presence if `include_presence_fallback` is enabled)
   - id (if JWT token auth used. Taken from user context.)
 
-Example:
+Main room example:
 
 ```json
 {
@@ -165,6 +228,29 @@ Example:
     "id": "00380324-a840-400d-880f-7ee0933b7556",
     "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
     "joined_at": 1625823996,
+    "left_at": 1625824035
+  }
+}
+```
+
+Breakout room example:
+
+```json
+{
+  "event_name": "muc-occupant-left",
+  "room_name": "catchup",
+  "room_jid": "catchup@conference.meet.mydomain.com",
+  "meeting_id": "378f2f94-5e2b-4a31-9ae4-2c99d424fa98",
+  "is_breakout": true,
+  "breakout_room_id": "breakout-1",
+  "breakout_meeting_id": "b719fb04-64b3-40cd-bfea-0fa48017f132",
+  "active_occupants_count": 1,
+  "occupant": {
+    "name": "James Barrow",
+    "email": "j.barrow@domain.com",
+    "id": "00380324-a840-400d-880f-7ee0933b7556",
+    "occupant_jid": "14f01c40-5195-4a4d-8efb-f58b49d18741@meet.mydomain.com/OWhl8jSh",
+    "joined_at": 1625824005,
     "left_at": 1625824035
   }
 }
