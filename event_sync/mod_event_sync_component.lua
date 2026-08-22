@@ -244,18 +244,32 @@ function is_system_event(event)
 end
 
 --- Updates payload with additional attributes from room._data.event_sync_extra_payload
+--- and with the meeting ID of the room(s) the payload describes
 function update_with_room_attributes(payload, room)
-    if room._data and room._data.event_sync_extra_payload then
+    if not room._data then
+        return;
+    end
+
+    if room._data.event_sync_extra_payload then
         for k,v in pairs(room._data.event_sync_extra_payload) do
             payload[k] = v;
         end
     end
 
-    -- Breakout room payloads use the main room's name and JID, so use its
-    -- meeting ID as well.
-    local meeting_room = room._data and room._data.main_room or room;
-    if meeting_room._data and meeting_room._data.meetingId then
-        payload.meeting_id = meeting_room._data.meetingId;
+    -- meetingId is read here instead of being cached when the room is created,
+    -- because jicofo is allowed to overwrite it afterwards.
+    if payload.is_breakout then
+        -- Breakout payloads report the main room in room_name/room_jid, so meeting_id
+        -- follows the main room too. The breakout's own ID goes in breakout_meeting_id.
+        local main_room = room._data.main_room;
+        if main_room and main_room._data then
+            payload['meeting_id'] = main_room._data.meetingId;
+        else
+            module:log("warn", "No main room for breakout %s, omitting meeting_id", room.jid);
+        end
+        payload['breakout_meeting_id'] = room._data.meetingId;
+    else
+        payload['meeting_id'] = room._data.meetingId;
     end
 end
 
