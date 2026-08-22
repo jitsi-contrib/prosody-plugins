@@ -1,10 +1,10 @@
 --- Collects final conference statistics and posts one JSON document to an HTTP endpoint.
 ---
---- Example Prosody configuration:
+--- Example for prosody.extraEnvs.XMPP_CONFIGURATION:
 ---
---- Component "cstatistics.meet.mydomain.com" "conference_statistics_component"
----     muc_component = "conference.meet.mydomain.com"
----     breakout_component = "breakout.meet.mydomain.com"
+--- Component "cstatistics.meet.jitsi" "conference_statistics_component"
+---     muc_component = "muc.meet.jitsi"
+---     breakout_component = "breakout.meet.jitsi"
 ---
 ---     api_prefix = "https://example.com/api"
 ---     api_timeout = 10
@@ -27,8 +27,8 @@
 ---
 --- The final URL is api_prefix .. "/events/conference/statistics".
 --- This component must not be added to XMPP_MUC_MODULES.
---- With Jitsi Helm, put the configuration block in
---- prosody.extraEnvs.XMPP_CONFIGURATION and mount this file in a Prosody plugin path.
+--- Mount this file as:
+--- /prosody-plugins-custom/mod_conference_statistics_component.lua
 --- HTTP configuration intentionally follows the event_sync component model.
 ---
 --- Runtime collection errors are isolated from the MUC hooks and included in the
