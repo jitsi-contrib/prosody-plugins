@@ -480,38 +480,98 @@ local function is_system_occupant(occupant)
     return is_sip_jigasi(presence) and true or false;
 end
 
-local function new_metric_state()
+local function new_connection_metric_state()
     return {
+        known = false;
         active = false;
-        started_at_ms = nil;
-        intervals = {};
     };
 end
 
-local function set_metric_state(metric, enabled, timestamp)
-    if enabled == nil or metric.active == enabled then
+local function new_aggregate_metric_state()
+    return {
+        active_count = 0;
+        started_at_ms = nil;
+        total_ms = 0;
+        enable_count = 0;
+        disable_count = 0;
+    };
+end
+
+local function activate_aggregate_metric(metric, timestamp, count_transition)
+    local was_active = metric.active_count > 0;
+    metric.active_count = metric.active_count + 1;
+    if was_active then
         return;
     end
 
-    if enabled then
-        metric.active = true;
-        metric.started_at_ms = timestamp;
+    metric.started_at_ms = timestamp;
+    if count_transition then
+        metric.enable_count = metric.enable_count + 1;
+    end
+end
+
+local function deactivate_aggregate_metric(metric, timestamp, count_transition)
+    if metric.active_count <= 0 then
+        return;
+    end
+
+    metric.active_count = metric.active_count - 1;
+    if metric.active_count > 0 then
         return;
     end
 
     local started_at_ms = metric.started_at_ms or timestamp;
-    table.insert(metric.intervals, {
-        start_ms = started_at_ms;
-        end_ms = math.max(started_at_ms, timestamp);
-    });
-    metric.active = false;
+    metric.total_ms = metric.total_ms + math.max(0, timestamp - started_at_ms);
     metric.started_at_ms = nil;
+    if count_transition then
+        metric.disable_count = metric.disable_count + 1;
+    end
 end
 
-local function close_metric_state(metric, timestamp)
-    if metric.active then
-        set_metric_state(metric, false, timestamp);
+local function set_connection_metric_state(
+        aggregate_metric,
+        connection_metric,
+        enabled,
+        timestamp,
+        count_transition)
+    if enabled == nil then
+        return;
     end
+
+    if not connection_metric.known then
+        connection_metric.known = true;
+        connection_metric.active = enabled;
+        if enabled then
+            activate_aggregate_metric(aggregate_metric, timestamp, false);
+        end
+        return;
+    end
+
+    if connection_metric.active == enabled then
+        return;
+    end
+
+    connection_metric.active = enabled;
+    if enabled then
+        activate_aggregate_metric(aggregate_metric, timestamp, count_transition);
+    else
+        deactivate_aggregate_metric(aggregate_metric, timestamp, count_transition);
+    end
+end
+
+local function close_connection_metric_state(aggregate_metric, connection_metric, timestamp)
+    if connection_metric.known and connection_metric.active then
+        connection_metric.active = false;
+        deactivate_aggregate_metric(aggregate_metric, timestamp, false);
+    end
+end
+
+local function aggregate_metric_total_ms(metric, timestamp)
+    local total_ms = metric.total_ms;
+    if metric.active_count > 0 then
+        total_ms = total_ms + math.max(0, timestamp - (metric.started_at_ms or timestamp));
+    end
+    return math.floor(math.max(0, total_ms));
 end
 
 local function parse_boolean(value)
@@ -644,7 +704,13 @@ local function parse_legacy_media_state(stanza)
     return microphone_enabled, camera_enabled, screenshare_enabled;
 end
 
-local function apply_presence_state(meeting, room_record, connection, stanza, timestamp)
+local function apply_presence_state(
+        meeting,
+        room_record,
+        connection,
+        stanza,
+        timestamp,
+        count_transitions)
     if not stanza or stanza.attr.type == "unavailable" or stanza.attr.type == "error" then
         return;
     end
@@ -662,9 +728,35 @@ local function apply_presence_state(meeting, room_record, connection, stanza, ti
         microphone_enabled, camera_enabled, screenshare_enabled = parse_legacy_media_state(stanza);
     end
 
-    set_metric_state(connection.microphone, microphone_enabled, timestamp);
-    set_metric_state(connection.camera, camera_enabled, timestamp);
-    set_metric_state(connection.screenshare, screenshare_enabled, timestamp);
+    local participant = meeting.participants_by_id[connection.participant_id];
+    if not participant then
+        append_error(
+            meeting,
+            "participant_missing",
+            "presence",
+            "Participant aggregate is unavailable for an active connection",
+            { room_jid = room_record.jid; participant_id = connection.participant_id });
+        return;
+    end
+
+    set_connection_metric_state(
+        participant.microphone,
+        connection.microphone,
+        microphone_enabled,
+        timestamp,
+        count_transitions);
+    set_connection_metric_state(
+        participant.camera,
+        connection.camera,
+        camera_enabled,
+        timestamp,
+        count_transitions);
+    set_connection_metric_state(
+        participant.screenshare,
+        connection.screenshare,
+        screenshare_enabled,
+        timestamp,
+        count_transitions);
 end
 
 local function snapshot_dominant_speaker(meeting, room, room_record, connection, timestamp)
@@ -705,9 +797,22 @@ local function close_connection(meeting, room, room_record, connection, timestam
 
     local ended_at_ms = math.max(connection.joined_at_ms, timestamp);
     snapshot_dominant_speaker(meeting, room, room_record, connection, ended_at_ms);
-    close_metric_state(connection.microphone, ended_at_ms);
-    close_metric_state(connection.camera, ended_at_ms);
-    close_metric_state(connection.screenshare, ended_at_ms);
+    local participant = meeting.participants_by_id[connection.participant_id];
+    if participant then
+        close_connection_metric_state(participant.microphone, connection.microphone, ended_at_ms);
+        close_connection_metric_state(participant.camera, connection.camera, ended_at_ms);
+        close_connection_metric_state(participant.screenshare, connection.screenshare, ended_at_ms);
+        deactivate_aggregate_metric(participant.presence, ended_at_ms, false);
+        participant.dominant_speaker_ms = participant.dominant_speaker_ms
+            + (connection.dominant_speaker_ms or 0);
+    else
+        append_error(
+            meeting,
+            "participant_missing",
+            "occupant_leaving",
+            "Participant aggregate is unavailable while closing a connection",
+            { room_jid = room_record.jid; participant_id = connection.participant_id });
+    end
     connection.left_at_ms = ended_at_ms;
 
     if room_record.active_by_real_jid[connection.real_jid] == connection then
@@ -727,7 +832,13 @@ local function get_or_create_participant(meeting, participant_id, id_source, dis
             display_name = display_name;
             email = email;
             endpoint_ids = {};
-            connections = {};
+            has_joined = false;
+            rejoin_count = 0;
+            presence = new_aggregate_metric_state();
+            microphone = new_aggregate_metric_state();
+            camera = new_aggregate_metric_state();
+            screenshare = new_aggregate_metric_state();
+            dominant_speaker_ms = 0;
         };
         meeting.participants_by_id[participant_id] = participant;
     else
@@ -791,11 +902,18 @@ local function handle_occupant_joined(event)
         id_source,
         display_name,
         email);
+    local endpoint_seen_before = participant.endpoint_ids[endpoint_id] and true or false;
+    if participant.presence.active_count == 0
+        and participant.has_joined
+        and not endpoint_seen_before then
+        participant.rejoin_count = participant.rejoin_count + 1;
+    end
+    participant.has_joined = true;
     participant.endpoint_ids[endpoint_id] = true;
     meeting.endpoint_to_participant[endpoint_id] = participant_id;
+    activate_aggregate_metric(participant.presence, joined_at_ms, false);
 
     local connection = {
-        connection_id = table.concat({ meeting.meeting_id; endpoint_id; tostring(next_sequence()) }, ":");
         participant_id = participant_id;
         endpoint_id = endpoint_id;
         real_jid = real_jid;
@@ -804,18 +922,17 @@ local function handle_occupant_joined(event)
         joined_at_ms = joined_at_ms;
         left_at_ms = nil;
         dominant_speaker_ms = 0;
-        microphone = new_metric_state();
-        camera = new_metric_state();
-        screenshare = new_metric_state();
+        microphone = new_connection_metric_state();
+        camera = new_connection_metric_state();
+        screenshare = new_connection_metric_state();
     };
 
-    table.insert(participant.connections, connection);
     room_record.active_by_real_jid[real_jid] = connection;
     room_record.active_by_nick[occupant_nick] = connection;
     meeting.connection_count = meeting.connection_count + 1;
 
     local presence = event.stanza or (occupant.get_presence and occupant:get_presence());
-    apply_presence_state(meeting, room_record, connection, presence, joined_at_ms);
+    apply_presence_state(meeting, room_record, connection, presence, joined_at_ms, false);
 end
 
 local function find_active_connection(room_record, occupant)
@@ -845,7 +962,7 @@ local function handle_presence(event)
         participant.display_name = display_name;
     end
 
-    apply_presence_state(meeting, room_record, connection, stanza, now_ms());
+    apply_presence_state(meeting, room_record, connection, stanza, now_ms(), true);
 end
 
 local function handle_occupant_leaving(event)
@@ -1021,48 +1138,6 @@ local function snapshot_polls(meeting, room, room_record)
     end
 end
 
-local function copy_interval(interval)
-    return {
-        start_ms = interval.start_ms;
-        end_ms = interval.end_ms;
-    };
-end
-
-local function merge_intervals(intervals)
-    local sorted = {};
-    for _, interval in ipairs(intervals) do
-        if type(interval.start_ms) == "number" and type(interval.end_ms) == "number" then
-            table.insert(sorted, copy_interval(interval));
-        end
-    end
-
-    table.sort(sorted, function(left, right)
-        if left.start_ms == right.start_ms then
-            return left.end_ms < right.end_ms;
-        end
-        return left.start_ms < right.start_ms;
-    end);
-
-    local merged = {};
-    for _, interval in ipairs(sorted) do
-        local last = merged[#merged];
-        if last and interval.start_ms <= last.end_ms then
-            last.end_ms = math.max(last.end_ms, interval.end_ms);
-        else
-            table.insert(merged, interval);
-        end
-    end
-    return merged;
-end
-
-local function sum_intervals(intervals)
-    local total = 0;
-    for _, interval in ipairs(intervals) do
-        total = total + math.max(0, interval.end_ms - interval.start_ms);
-    end
-    return math.floor(total);
-end
-
 local function make_json_array(values)
     if #values == 0 then
         return EMPTY_ARRAY;
@@ -1070,13 +1145,7 @@ local function make_json_array(values)
     return values;
 end
 
-local function build_participant_output(participant)
-    local presence_intervals = {};
-    local microphone_intervals = {};
-    local camera_intervals = {};
-    local screenshare_intervals = {};
-    local dominant_speaker_ms = 0;
-    local connections = {};
+local function build_participant_output(participant, timestamp)
     local endpoint_ids = {};
 
     for endpoint_id in pairs(participant.endpoint_ids) do
@@ -1084,46 +1153,7 @@ local function build_participant_output(participant)
     end
     table.sort(endpoint_ids);
 
-    for _, connection in ipairs(participant.connections) do
-        local left_at_ms = connection.left_at_ms or connection.joined_at_ms;
-        table.insert(presence_intervals, {
-            start_ms = connection.joined_at_ms;
-            end_ms = left_at_ms;
-        });
-        for _, interval in ipairs(connection.microphone.intervals) do
-            table.insert(microphone_intervals, copy_interval(interval));
-        end
-        for _, interval in ipairs(connection.camera.intervals) do
-            table.insert(camera_intervals, copy_interval(interval));
-        end
-        for _, interval in ipairs(connection.screenshare.intervals) do
-            table.insert(screenshare_intervals, copy_interval(interval));
-        end
-
-        dominant_speaker_ms = dominant_speaker_ms + (connection.dominant_speaker_ms or 0);
-        table.insert(connections, {
-            connection_id = connection.connection_id;
-            endpoint_id = connection.endpoint_id;
-            room_jid = connection.room_jid;
-            joined_at_ms = connection.joined_at_ms;
-            left_at_ms = left_at_ms;
-            presence_ms = math.max(0, left_at_ms - connection.joined_at_ms);
-            dominant_speaker_ms = connection.dominant_speaker_ms or 0;
-        });
-    end
-
-    table.sort(connections, function(left, right)
-        if left.joined_at_ms == right.joined_at_ms then
-            return left.connection_id < right.connection_id;
-        end
-        return left.joined_at_ms < right.joined_at_ms;
-    end);
-
-    presence_intervals = merge_intervals(presence_intervals);
-    microphone_intervals = merge_intervals(microphone_intervals);
-    camera_intervals = merge_intervals(camera_intervals);
-    screenshare_intervals = merge_intervals(screenshare_intervals);
-    local presence_ms = sum_intervals(presence_intervals);
+    local presence_ms = aggregate_metric_total_ms(participant.presence, timestamp);
 
     return {
         participant_id = participant.participant_id;
@@ -1132,17 +1162,17 @@ local function build_participant_output(participant)
         email = participant.email;
         endpoint_ids = make_json_array(endpoint_ids);
         presence_ms = presence_ms;
-        microphone_unmuted_ms = sum_intervals(microphone_intervals);
-        dominant_speaker_ms = math.min(math.floor(dominant_speaker_ms), presence_ms);
-        camera_enabled_ms = sum_intervals(camera_intervals);
-        screenshare_enabled_ms = sum_intervals(screenshare_intervals);
-        connections = make_json_array(connections);
-        intervals = {
-            presence = make_json_array(presence_intervals);
-            microphone_unmuted = make_json_array(microphone_intervals);
-            camera_enabled = make_json_array(camera_intervals);
-            screenshare_enabled = make_json_array(screenshare_intervals);
-        };
+        rejoin_count = participant.rejoin_count;
+        microphone_unmuted_ms = aggregate_metric_total_ms(participant.microphone, timestamp);
+        microphone_unmute_count = participant.microphone.enable_count;
+        microphone_mute_count = participant.microphone.disable_count;
+        dominant_speaker_ms = math.min(math.floor(participant.dominant_speaker_ms), presence_ms);
+        camera_enabled_ms = aggregate_metric_total_ms(participant.camera, timestamp);
+        camera_enable_count = participant.camera.enable_count;
+        camera_disable_count = participant.camera.disable_count;
+        screenshare_enabled_ms = aggregate_metric_total_ms(participant.screenshare, timestamp);
+        screenshare_start_count = participant.screenshare.enable_count;
+        screenshare_stop_count = participant.screenshare.disable_count;
     };
 end
 
@@ -1160,16 +1190,19 @@ local function copy_error_output(item)
 end
 
 local function build_payload(meeting)
+    local ended_at_ms = meeting.ended_at_ms or now_ms();
     local rooms = {};
     for _, room_record in pairs(meeting.rooms_by_jid) do
-        local ended_at_ms = room_record.ended_at_ms or meeting.ended_at_ms or room_record.started_at_ms;
+        local room_ended_at_ms = room_record.ended_at_ms
+            or meeting.ended_at_ms
+            or room_record.started_at_ms;
         table.insert(rooms, {
             room_id = room_record.room_id;
             jid = room_record.jid;
             is_breakout = room_record.is_breakout;
             started_at_ms = room_record.started_at_ms;
-            ended_at_ms = ended_at_ms;
-            duration_ms = math.max(0, ended_at_ms - room_record.started_at_ms);
+            ended_at_ms = room_ended_at_ms;
+            duration_ms = math.max(0, room_ended_at_ms - room_record.started_at_ms);
         });
     end
     table.sort(rooms, function(left, right)
@@ -1181,7 +1214,7 @@ local function build_payload(meeting)
 
     local participants = {};
     for _, participant in pairs(meeting.participants_by_id) do
-        table.insert(participants, build_participant_output(participant));
+        table.insert(participants, build_participant_output(participant, ended_at_ms));
     end
     table.sort(participants, function(left, right)
         return left.participant_id < right.participant_id;
@@ -1192,7 +1225,6 @@ local function build_payload(meeting)
         table.insert(errors, copy_error_output(item));
     end
 
-    local ended_at_ms = meeting.ended_at_ms or now_ms();
     return {
         schema = "jitsi-conference-statistics/v1";
         meeting_id = meeting.meeting_id;

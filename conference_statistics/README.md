@@ -8,10 +8,12 @@ The component groups main and breakout rooms by the Jitsi meeting ID and
 collects:
 
 - participant presence time;
+- participant rejoin count;
 - microphone unmuted time;
+- microphone mute and unmute counts;
 - dominant speaker time from Jitsi `speakerstats`;
-- camera enabled time;
-- screen sharing time;
+- camera enabled time and enable/disable counts;
+- screen sharing time and start/stop counts;
 - public group chat messages;
 - final poll state, including named voters;
 - collection and delivery errors.
@@ -23,9 +25,16 @@ All timestamps and durations are expressed as Unix time in milliseconds.
 The preferred participant identifier is `context.user.id` from the JWT. If it
 is unavailable, the component falls back to the endpoint or occupant ID.
 
-Reconnects and movements between the main room and breakout rooms are kept as
-separate connections under the same participant when the identifier remains
-stable. Overlapping intervals are merged before totals are calculated.
+Totals are accumulated online per participant and are not stored as connection
+or state-change timelines. Overlapping main-room, breakout-room, or reconnect
+connections use reference-counted effective state, so their durations are not
+counted twice.
+
+`rejoin_count` is incremented when a JWT-identified participant joins with a
+new endpoint ID after all previous connections have ended. Moving between
+rooms with an endpoint ID already seen for that participant is not a rejoin.
+Without a stable JWT user ID, a new endpoint ID is a new participant and cannot
+be reliably correlated as a rejoin.
 
 Focus, Jibri, Jigasi, transcribers and health-check rooms are excluded.
 
@@ -35,27 +44,34 @@ Microphone, camera and screen-sharing state is read from the modern Jitsi
 `SourceInfo` presence element. The legacy `audiomuted`, `videomuted` and
 `videoType` fields are also supported as a compatibility fallback.
 
-The participant object contains both totals and the merged source intervals:
+The participant object contains compact totals and transition counters:
 
 ```json
 {
   "participant_id": "user-123",
+  "participant_id_source": "jwt",
   "display_name": "Example User",
+  "email": "user@example.com",
+  "endpoint_ids": ["endpoint-1", "endpoint-2"],
   "presence_ms": 3120000,
+  "rejoin_count": 1,
   "microphone_unmuted_ms": 1800000,
+  "microphone_unmute_count": 4,
+  "microphone_mute_count": 4,
   "dominant_speaker_ms": 420000,
   "camera_enabled_ms": 2700000,
+  "camera_enable_count": 2,
+  "camera_disable_count": 2,
   "screenshare_enabled_ms": 300000,
-  "intervals": {
-    "presence": [
-      {
-        "start_ms": 1787135041199,
-        "end_ms": 1787138161199
-      }
-    ]
-  }
+  "screenshare_start_count": 1,
+  "screenshare_stop_count": 1
 }
 ```
+
+The initial media state of a connection establishes its baseline and does not
+increment a transition counter. Repeated presence stanzas with the same state
+also do not increment counters. A connection ending removes its active state
+without counting it as a user mute, camera disable, or screen-share stop.
 
 Only public MUC `groupchat` messages are collected. Private messages are not
 captured.
@@ -197,7 +213,9 @@ to the same YAML value. Do not declare `XMPP_CONFIGURATION` twice.
 
 - HTTP requests and retry timers are non-blocking.
 - Runtime exceptions in MUC hooks are isolated and recorded in `errors`.
-- Statistics are held in memory until the conference ends.
+- Compact participant totals, active connections, chat, polls, and errors are
+  held in memory until the conference ends. Closed connection and media-state
+  timelines are not retained.
 - There is no persistent spool. A Prosody restart or exhausted delivery retries
   can cause statistics to be lost.
 - The component executes in the Prosody process and is not process-isolated.
@@ -205,4 +223,5 @@ to the same YAML value. Do not declare `XMPP_CONFIGURATION` twice.
   is assembled and encoded.
 
 Safety limits should be selected according to the expected conference size and
-chat activity.
+chat activity. Chat content will normally dominate memory use after participant
+timelines have been removed.
