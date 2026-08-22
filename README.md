@@ -10,6 +10,11 @@
   Provides an authentication provider for `Prosody` which supports `Matrix` and
   standard `Jitsi` token at the same time.
 
+- [conference statistics](conference_statistics/)
+
+  Collects participant media statistics, public chat and polls and sends one
+  final JSON document to an HTTP endpoint.
+
 - [event sync](event_sync/)
 
   Sends HTTP POST to external API when occupant or room events triggered.
