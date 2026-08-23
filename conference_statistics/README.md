@@ -87,8 +87,8 @@ The participant object contains compact totals and transition counters:
   "screenshare_enabled_ms": 300000,
   "screenshare_start_count": 1,
   "screenshare_stop_count": 1,
-  "chat_message_count": 7,
-  "poll_voter_count": 1
+  "chat_message_count": 1,
+  "poll_vote_count": 1
 }
 ```
 
@@ -109,8 +109,8 @@ without keeping any message body, question, option text or voter identity:
 - `chat_message_count` on the conference and on each room: the number of
   messages sent in it;
 - `poll_count` on the conference and on each room: the number of polls;
-- `poll_voter_count` on the conference and on each room: the number of voters,
-  counted once per poll.
+- `poll_vote_count` on the conference and on each room: the number of votes,
+  counting each participant at most once per poll.
 
 Set `include_chat_content = true` to collect the `chat` array and
 `include_poll_content = true` to collect the `polls` array. Both default to
@@ -181,9 +181,9 @@ Example of a complete successful document:
     "started_at_ms": 1787135041199,
     "ended_at_ms": 1787138161199,
     "duration_ms": 3120000,
-    "chat_message_count": 7,
+    "chat_message_count": 1,
     "poll_count": 1,
-    "poll_voter_count": 1
+    "poll_vote_count": 1
   },
   "rooms": [
     {
@@ -193,9 +193,9 @@ Example of a complete successful document:
       "started_at_ms": 1787135041199,
       "ended_at_ms": 1787138161199,
       "duration_ms": 3120000,
-      "chat_message_count": 6,
+      "chat_message_count": 0,
       "poll_count": 1,
-      "poll_voter_count": 1
+      "poll_vote_count": 1
     },
     {
       "room_id": "8fcfc934-76d8-40ce-8ef8-bc5d257a164e",
@@ -207,7 +207,7 @@ Example of a complete successful document:
       "duration_ms": 600000,
       "chat_message_count": 1,
       "poll_count": 0,
-      "poll_voter_count": 0
+      "poll_vote_count": 0
     }
   ],
   "participants": [
@@ -232,8 +232,8 @@ Example of a complete successful document:
       "screenshare_enabled_ms": 300000,
       "screenshare_start_count": 1,
       "screenshare_stop_count": 1,
-      "chat_message_count": 7,
-      "poll_voter_count": 1
+      "chat_message_count": 1,
+      "poll_vote_count": 1
     }
   ],
   "chat": [
