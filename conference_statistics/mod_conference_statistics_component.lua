@@ -415,7 +415,7 @@ local function new_meeting(meeting_id, main_room, started_at_ms)
         chat_message_count = 0;
         polls = {};
         poll_count = 0;
-        poll_vote_count = 0;
+        poll_voter_count = 0;
         errors = {};
         error_index = {};
         errors_dropped = 0;
@@ -567,7 +567,7 @@ local function track_room(room, is_breakout)
         destroyed = false;
         chat_message_count = 0;
         poll_count = 0;
-        poll_vote_count = 0;
+        poll_voter_count = 0;
         active_by_real_jid = {};
         active_by_nick = {};
     };
@@ -992,7 +992,7 @@ local function get_or_create_participant(meeting, participant_id, id_source, dis
             screenshare = new_aggregate_metric_state();
             dominant_speaker_ms = 0;
             chat_message_count = 0;
-            poll_vote_count = 0;
+            poll_voter_count = 0;
         };
         meeting.participants_by_id[participant_id] = participant;
     else
@@ -1238,18 +1238,43 @@ local function count_poll_state(meeting, room_record, poll)
     meeting.poll_count = meeting.poll_count + 1;
     room_record.poll_count = room_record.poll_count + 1;
 
+    -- A participant is counted only once within a single poll. Jitsi records one
+    -- voter entry per selected option, so a multiple-choice vote would otherwise
+    -- count the same person once per option.
+    local counted_voters = {};
+
     for _, answer in ipairs(type(poll.answers) == "table" and poll.answers or {}) do
         if type(answer) == "table" and type(answer.voters) == "table" then
             for _, voter in ipairs(answer.voters) do
                 if type(voter) == "table" then
-                    meeting.poll_vote_count = meeting.poll_vote_count + 1;
-                    room_record.poll_vote_count = room_record.poll_vote_count + 1;
-
                     local voter_id = safe_string(voter.id, 512);
-                    local participant_id = voter_id and meeting.endpoint_to_participant[voter_id];
-                    local participant = participant_id and meeting.participants_by_id[participant_id];
-                    if participant then
-                        participant.poll_vote_count = participant.poll_vote_count + 1;
+                    if voter_id == "" then
+                        voter_id = nil;
+                    end
+
+                    local participant_id = voter_id
+                        and meeting.endpoint_to_participant[voter_id];
+
+                    -- Prefer the stable participant ID so different endpoint IDs
+                    -- belonging to the same participant are counted only once.
+                    local voter_key = participant_id
+                        and "participant:" .. participant_id
+                        or voter_id and "endpoint:" .. voter_id;
+
+                    if voter_key and not counted_voters[voter_key] then
+                        counted_voters[voter_key] = true;
+
+                        meeting.poll_voter_count = meeting.poll_voter_count + 1;
+                        room_record.poll_voter_count
+                            = room_record.poll_voter_count + 1;
+
+                        local participant = participant_id
+                            and meeting.participants_by_id[participant_id];
+
+                        if participant then
+                            participant.poll_voter_count
+                                = participant.poll_voter_count + 1;
+                        end
                     end
                 end
             end
@@ -1367,7 +1392,7 @@ local function build_participant_output(participant, timestamp)
         screenshare_start_count = participant.screenshare.enable_count;
         screenshare_stop_count = participant.screenshare.disable_count;
         chat_message_count = participant.chat_message_count;
-        poll_vote_count = participant.poll_vote_count;
+        poll_voter_count = participant.poll_voter_count;
     };
 end
 
@@ -1400,7 +1425,7 @@ local function build_payload(meeting)
             duration_ms = math.max(0, room_ended_at_ms - room_record.started_at_ms);
             chat_message_count = room_record.chat_message_count;
             poll_count = room_record.poll_count;
-            poll_vote_count = room_record.poll_vote_count;
+            poll_voter_count = room_record.poll_voter_count;
         };
         if room_record.is_breakout then
             room_output.breakout_meeting_id = room_record.breakout_meeting_id;
@@ -1448,7 +1473,7 @@ local function build_payload(meeting)
             duration_ms = math.max(0, ended_at_ms - meeting.started_at_ms);
             chat_message_count = meeting.chat_message_count;
             poll_count = meeting.poll_count;
-            poll_vote_count = meeting.poll_vote_count;
+            poll_voter_count = meeting.poll_voter_count;
         };
         rooms = make_json_array(rooms);
         participants = make_json_array(participants);

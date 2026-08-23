@@ -88,7 +88,7 @@ The participant object contains compact totals and transition counters:
   "screenshare_start_count": 1,
   "screenshare_stop_count": 1,
   "chat_message_count": 7,
-  "poll_vote_count": 1
+  "poll_voter_count": 1
 }
 ```
 
@@ -103,11 +103,14 @@ captured.
 ## Chat and polls
 
 Chat and poll **content** is not collected unless it is explicitly enabled.
-Counts are always reported: `chat_message_count` on the conference, on each
-room and on each participant and `poll_count` / `poll_vote_count` on the
-conference and each room plus `poll_vote_count` on each participant. So a
-deployment can measure chat and poll activity without keeping any message
-body, question, option text or voter identity.
+Counts are always reported, so a deployment can measure chat and poll activity
+without keeping any message body, question, option text or voter identity:
+
+- `chat_message_count` on the conference and on each room: the number of
+  messages sent in it;
+- `poll_count` on the conference and on each room: the number of polls;
+- `poll_voter_count` on the conference and on each room: the number of voters,
+  counted once per poll.
 
 Set `include_chat_content = true` to collect the `chat` array and
 `include_poll_content = true` to collect the `polls` array. Both default to
@@ -178,9 +181,9 @@ Example of a complete successful document:
     "started_at_ms": 1787135041199,
     "ended_at_ms": 1787138161199,
     "duration_ms": 3120000,
-    "chat_message_count": 12,
+    "chat_message_count": 7,
     "poll_count": 1,
-    "poll_vote_count": 3
+    "poll_voter_count": 1
   },
   "rooms": [
     {
@@ -190,9 +193,9 @@ Example of a complete successful document:
       "started_at_ms": 1787135041199,
       "ended_at_ms": 1787138161199,
       "duration_ms": 3120000,
-      "chat_message_count": 9,
+      "chat_message_count": 6,
       "poll_count": 1,
-      "poll_vote_count": 3
+      "poll_voter_count": 1
     },
     {
       "room_id": "8fcfc934-76d8-40ce-8ef8-bc5d257a164e",
@@ -202,9 +205,9 @@ Example of a complete successful document:
       "started_at_ms": 1787136000000,
       "ended_at_ms": 1787136600000,
       "duration_ms": 600000,
-      "chat_message_count": 3,
+      "chat_message_count": 1,
       "poll_count": 0,
-      "poll_vote_count": 0
+      "poll_voter_count": 0
     }
   ],
   "participants": [
@@ -230,7 +233,7 @@ Example of a complete successful document:
       "screenshare_start_count": 1,
       "screenshare_stop_count": 1,
       "chat_message_count": 7,
-      "poll_vote_count": 1
+      "poll_voter_count": 1
     }
   ],
   "chat": [
