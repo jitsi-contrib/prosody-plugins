@@ -177,7 +177,7 @@ Example of a complete successful document:
   "collection_complete": true,
   "errors_dropped": 0,
   "conference": {
-    "main_room_jid": "catchup@conference.meet.mydomain.com",
+    "main_room_jid": "99d75fd4-a65f-4580-865d-0f3a2cd9d800@conference.meet.mydomain.com",
     "started_at_ms": 1787135041199,
     "ended_at_ms": 1787138161199,
     "duration_ms": 3120000,
@@ -187,8 +187,8 @@ Example of a complete successful document:
   },
   "rooms": [
     {
-      "room_id": "catchup",
-      "jid": "catchup@conference.meet.mydomain.com",
+      "room_id": "99d75fd4-a65f-4580-865d-0f3a2cd9d800",
+      "jid": "99d75fd4-a65f-4580-865d-0f3a2cd9d800@conference.meet.mydomain.com",
       "is_breakout": false,
       "started_at_ms": 1787135041199,
       "ended_at_ms": 1787138161199,
@@ -251,8 +251,8 @@ Example of a complete successful document:
   "polls": [
     {
       "poll_id": "poll-1",
-      "room_id": "catchup",
-      "room_jid": "catchup@conference.meet.mydomain.com",
+      "room_id": "99d75fd4-a65f-4580-865d-0f3a2cd9d800",
+      "room_jid": "99d75fd4-a65f-4580-865d-0f3a2cd9d800@conference.meet.mydomain.com",
       "creator_endpoint_id": "endpoint-1",
       "creator_participant_id": "user-123",
       "creator_name": "Example User",
