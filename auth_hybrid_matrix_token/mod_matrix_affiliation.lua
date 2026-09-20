@@ -1,13 +1,10 @@
 -- -----------------------------------------------------------------------------
 -- Matrix Affiliation (downgrade only)
 -- -----------------------------------------------------------------------------
--- This module updates the affiliation of participants if the room is created
--- by Element's Jitsi widget. This module checks Jitsi room name to understand
--- if this room is created by widget or not...
---
--- There are two possible formats for Jitsi room names created by widget:
--- - jitsi_room_name should match "^jitsi[a-z]{24}$" (regex) or
--- - base32.decode(jitsi_room_name) should match "^!.*:.*[.].*" (regex)
+-- This module updates the affiliation of participants if the room belongs to
+-- a Matrix room. That is decided by mod_auth_hybrid_matrix_token, which sets
+-- the Matrix context on the session once it has verified the token and the
+-- room it refers to.
 --
 -- This module assumes that the authentication is already enabled on Jicofo. So
 -- every participants who have a valid token will become moderator (owner) by
@@ -16,11 +13,9 @@
 -- This module downgrades the affiliation level (from owner to member) of
 -- the participant if she is not an admin in the related Matrix room.
 -- -----------------------------------------------------------------------------
-local basexx = require 'basexx'
 local util = module:require 'util';
 local is_admin = util.is_admin;
 local is_healthcheck_room = util.is_healthcheck_room
-local jid_split = require "util.jid".split
 local timer = require "util.timer"
 local LOGLEVEL = "debug"
 
@@ -49,25 +44,14 @@ module:hook("muc-occupant-joined", function (event)
         return
     end
 
-    local roomName, _ = jid_split(room.jid)
-    local isMatrixRoomName = string.match(
-        roomName,
-        "^jitsi%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l$"
-    )
-
-    -- if it doesnt match the first format, check the second possible format
-    if not isMatrixRoomName then
-        local roomId = basexx.from_base32(roomName)
-        if not roomId then
-            module:log(LOGLEVEL, "skip affiliation, cannot decode the name")
-            return
-        end
-
-        local isMatrixRoomId = string.match(roomId, "^!.*:.*[.].*")
-        if not isMatrixRoomId then
-            module:log(LOGLEVEL, "skip affiliation, not a Matrix room")
-            return
-        end
+    -- mod_auth_hybrid_matrix_token compares the decoded room name against the
+    -- room ID in the token and rejects the session when they differ, so a
+    -- session that carries the Matrix context is in a Matrix room. Deriving
+    -- that from the room name here would only repeat a weaker test, and it
+    -- misses room IDs from room version 12 on, which have no server part.
+    if not session.jitsi_meet_context_matrix then
+        module:log(LOGLEVEL, "skip affiliation, not a Matrix room")
+        return
     end
 
     if session.matrix_affiliation == "owner" then

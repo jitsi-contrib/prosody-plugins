@@ -1,21 +1,16 @@
 -- -----------------------------------------------------------------------------
 -- Matrix Lobby Bypass
 -- -----------------------------------------------------------------------------
--- This module allows Matrix room members to bypass Jitsi lobby check if the
--- meeting room is created by Element's Jitsi widget. This module checks Jitsi
--- room name to understand if this room is created by widget or not...
---
--- There are two possible formats for Jitsi room names created by widget:
--- - jitsi_room_name should match "^jitsi[a-z]{24}$" (regex) or
--- - base32.decode(jitsi_room_name) should match "^!.*:.*[.].*" (regex)
+-- This module allows Matrix room members to bypass Jitsi lobby check. The
+-- session is known to belong to a Matrix room because
+-- mod_auth_hybrid_matrix_token verified the token and the room it refers to
+-- before setting the affiliation checked below.
 --
 -- If the participant is already a valid member of Matrix's room then no need to
 -- check her again in Jitsi lobby.
 -- -----------------------------------------------------------------------------
-local basexx = require 'basexx'
 local util = module:require 'util'
 local is_healthcheck_room = util.is_healthcheck_room
-local jid_split = require "util.jid".split
 local LOGLEVEL = "debug"
 
 module:hook("muc-occupant-pre-join", function (event)
@@ -34,27 +29,6 @@ module:hook("muc-occupant-pre-join", function (event)
     if not event.origin.matrix_affiliation then
         module:log(LOGLEVEL, "skip lobby_bypass, not a Matrix user")
         return
-    end
-
-    local roomName, _ = jid_split(room.jid)
-    local isMatrixRoomName = string.match(
-        roomName,
-        "^jitsi%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l%l$"
-    )
-
-    -- if it doesnt match the first format, check the second possible format
-    if not isMatrixRoomName then
-        local roomId = basexx.from_base32(roomName)
-        if not roomId then
-            module:log(LOGLEVEL, "skip lobby_bypass, cannot decode the name")
-            return
-        end
-
-        local isMatrixRoomId = string.match(roomId, "^!.*:.*[.].*")
-        if not isMatrixRoomId then
-            module:log(LOGLEVEL, "skip lobby_bypass, not a Matrix room")
-            return
-        end
     end
 
     -- bypass room password if exists
